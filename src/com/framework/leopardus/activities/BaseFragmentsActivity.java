@@ -12,6 +12,7 @@ import com.framework.leopardus.fragments.BaseFragment;
 import com.framework.leopardus.fragments.BaseMenuFragment;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
 import com.framework.leopardus.interfaces.InterfacesHelper;
+import com.framework.leopardus.utils.Injector;
 import com.slidingmenu.lib.SlidingMenu;
 import com.slidingmenu.lib.app.SlidingFragmentActivity;
 
@@ -21,7 +22,7 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	private SlidingMenu slidingMenu;
 	private boolean enableMenuOnHome = false;
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,6 +44,9 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		Fragment firstFragment = new BaseFragment();
 		setActualFragment(firstFragment);
 		setSlidingActionBarEnabled(true);
+		// //////////////////////////////////////////
+		Injector inj = new Injector(this);
+		inj.injectViews(this);
 	}
 
 	@Override
@@ -75,29 +79,29 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	public boolean isEnabledMenuOnHome() {
 		return enableMenuOnHome;
 	}
-	
-	public BaseMenuFragment getMenu(){
+
+	public BaseMenuFragment getMenu() {
 		return menuFragment;
 	}
-	
-	public void close(){
+
+	public void close() {
 		closeCallback.Method(this);
 	}
-	
-	public void setOnCloseEvent(ActivityMethodInterface ami){
+
+	public void setOnCloseEvent(ActivityMethodInterface ami) {
 		closeCallback = ami;
 	}
-	
-	public Activity getMySelf(){
+
+	public Activity getMySelf() {
 		return this;
 	}
 
-	public void enableHomeAsButton(){
+	public void enableHomeAsButton() {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
-	public void disableHomeAsButton(){
+	public void disableHomeAsButton() {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 	}
-	
+
 }
