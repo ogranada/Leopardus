@@ -1,6 +1,6 @@
 package com.framework.leopardus.fragments;
 
-
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,17 +12,20 @@ import com.framework.leopardus.interfaces.InterfacesHelper;
 import com.framework.leopardus.interfaces.MethodInterface;
 import com.framework.leopardus.utils.Injector;
 
-public class BaseFragment extends Fragment{
+public class BaseFragment extends Fragment {
 
 	final int layout;
 	final MethodInterface iface;
-	
-	private void startInjection(View v){
+	Activity activity;
+//	ShowcaseView sv;
+//	ShowcaseView.ConfigOptions co;
+
+	private void startInjection(View v) {
 		Injector inj = new Injector(v);
 		inj.injectViews(this);
 		inj.injectMethodsIntoViews(this);
 	}
-	
+
 	public BaseFragment() {
 		super();
 		layout = R.layout.base_layout;
@@ -40,14 +43,26 @@ public class BaseFragment extends Fragment{
 		layout = lyt;
 		iface = intrface;
 	}
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(layout, container, false);
+		activity = ((Activity)v.getContext());
 		iface.Method(v);
 		startInjection(v);
 		return v;
 	}
+//
+//	public void addShowCase(int target, String title,
+//			String message, ShowcaseView.OnShowcaseEventListener sclstnr) {
+//		if (co == null) {
+//			co = new ShowcaseView.ConfigOptions();
+//			co.hideOnClickOutside = true;
+//		}
+//		sv = ShowcaseView.insertShowcaseView(target, activity, title, message,
+//				co);
+//		sv.setOnShowcaseEventListener(sclstnr);
+//	}
 
 }
