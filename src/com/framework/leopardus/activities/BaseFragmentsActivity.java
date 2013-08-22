@@ -1,11 +1,14 @@
 package com.framework.leopardus.activities;
 
+import java.util.Stack;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 
-import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.framework.leopardus.R;
 import com.framework.leopardus.fragments.BaseFragment;
@@ -21,7 +24,10 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	private BaseMenuFragment menuFragment;
 	private SlidingMenu slidingMenu;
 	private boolean enableMenuOnHome = false;
+	private FragmentManager fragmentManager = getSupportFragmentManager();
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
+
+	Stack<Fragment> fragments = new Stack<Fragment>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,7 +48,7 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		// ///////////////////////////////////////////
 		setContentView(R.layout.content_frame);
 		Fragment firstFragment = new BaseFragment();
-		setActualFragment(firstFragment);
+		setActualFragment(firstFragment, false);
 		setSlidingActionBarEnabled(true);
 		// ///////////////////////////////////////////
 		Injector i = new Injector(this);
@@ -62,10 +68,58 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * Set the actual fragment
+	 * 
+	 * @param frgmnt
+	 */
 	public void setActualFragment(Fragment frgmnt) {
-		getSupportFragmentManager().beginTransaction()
-				.replace(R.id.content_frame, frgmnt).commit();
+		setActualFragment(frgmnt, true);
+	}
+
+	private void setActualFragment(Fragment frgmnt, boolean addToStack) {
+		if (frgmnt == null) {
+			return;
+		}
+		if (addToStack) {
+			if (fragments.size() > 0) {
+				Fragment top = fragments.pop();
+				if (!fragments.contains(frgmnt) && !frgmnt.equals(top)) {
+					fragments.push(top);
+					fragments.push(frgmnt);
+				} else {
+					fragments.push(top);
+					if (fragments.contains(frgmnt)) {
+						top = null;
+						while (!frgmnt.equals(top)) {
+							top = fragments.pop();
+						}
+						fragments.push(frgmnt);
+					}
+				}
+			} else if (fragments.size() == 0) {
+				fragments.push(frgmnt);
+			}
+		}
+		FragmentTransaction transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.content_frame, frgmnt);
+		transaction.commit();
 		getSlidingMenu().showContent();
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+			if (fragments.size() <= 1) {
+				closeCallback.Method(this);
+				return false;// super.onKeyDown(keyCode, event);
+			} else {
+				fragments.pop();
+				setActualFragment(fragments.pop());
+				return false;
+			}
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 
 	public void setEnabledMenuOnHome() {

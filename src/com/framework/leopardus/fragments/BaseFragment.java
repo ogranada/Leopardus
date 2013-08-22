@@ -2,7 +2,6 @@ package com.framework.leopardus.fragments;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,8 +29,7 @@ public class BaseFragment extends SherlockFragment {
 	private String headerImagePath = "";
 	private FadingActionBarHelper fadingHelper;
 	private ImageView headerImg = null;
-	private int theme = R.style.AppTheme_TranslucentActionBar;
-
+	
 	private void startInjection(View v) {
 		Injector inj = new Injector(v);
 		inj.injectViews(this);
