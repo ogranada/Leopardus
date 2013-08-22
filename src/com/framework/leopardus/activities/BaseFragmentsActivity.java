@@ -44,6 +44,9 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		Fragment firstFragment = new BaseFragment();
 		setActualFragment(firstFragment);
 		setSlidingActionBarEnabled(true);
+		// ///////////////////////////////////////////
+		Injector i = new Injector(this);
+		i.injectMenuItems(this);
 	}
 
 	@Override

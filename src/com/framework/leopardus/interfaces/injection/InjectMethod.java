@@ -1,4 +1,4 @@
-package com.framework.leopardus.interfaces;
+package com.framework.leopardus.interfaces.injection;
 
 
 import java.lang.annotation.ElementType;
