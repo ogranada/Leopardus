@@ -35,13 +35,24 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	private PullToRefreshAttacher pullToRefreshAttacher = null;
 
 	/**
-	 * Init PullToRefreshListener fir the provided view
+	 * Init and return the PullToRefreshAttacher
+	 * @return PullToRefreshAttacher instance
+	 */
+	public PullToRefreshAttacher PullToRefreshInit() {
+		if (pullToRefreshAttacher == null) {
+			pullToRefreshAttacher = PullToRefreshAttacher.get(this);
+		}
+		return pullToRefreshAttacher;
+	}
+
+	/**
+	 * Set the refresh listener for the provided view
 	 * @param view
 	 * @param onRefreshListener
 	 */
-	public void PullToRefreshInit(View view, OnRefreshListener onRefreshListener) {
+	public void estabilishRereshForView(View view, OnRefreshListener onRefreshListener) {
 		if (pullToRefreshAttacher == null) {
-			pullToRefreshAttacher = PullToRefreshAttacher.get(this);
+			PullToRefreshInit();
 		}
 		pullToRefreshAttacher.addRefreshableView(view, onRefreshListener);
 	}

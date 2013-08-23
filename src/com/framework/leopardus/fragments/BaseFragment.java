@@ -65,6 +65,20 @@ public class BaseFragment extends SherlockFragment {
 		iface = intrface;
 	}
 
+	public BaseFragment(Integer lyt, BaseFragmentsActivity parentAct) {
+		super();
+		layout = lyt;
+		iface = InterfacesHelper.getVoidMethod();
+		setParentActivity(parentAct);
+	}
+
+	public BaseFragment(Integer lyt, MethodInterface intrface, BaseFragmentsActivity parentAct) {
+		super();
+		layout = lyt;
+		iface = intrface;
+		setParentActivity(parentAct);
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
