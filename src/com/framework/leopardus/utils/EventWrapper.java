@@ -2,6 +2,8 @@ package com.framework.leopardus.utils;
 
 import java.lang.reflect.Method;
 
+import com.framework.leopardus.exceptions.LeopardusException;
+
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +22,7 @@ public class EventWrapper {
 				try {
 					method.invoke(baseView, v);
 				} catch (Exception e) {
-					Log.e("Leopardus", method.getName() + ":" + e.getMessage());
+					throw new RuntimeException(new LeopardusException(e));
 				}
 			}
 		});
@@ -35,8 +37,7 @@ public class EventWrapper {
 				try {
 					return (Boolean) method.invoke(baseView, v);
 				} catch (Exception e) {
-					Log.e("Leopardus", method.getName() + ":" + e.getMessage());
-					return false;
+					throw new RuntimeException(new LeopardusException(e));
 				}
 			}
 		});
@@ -51,8 +52,7 @@ public class EventWrapper {
 				try {
 					return (Boolean) method.invoke(baseView, v, event);
 				} catch (Exception e) {
-					Log.e("Leopardus", method.getName() + ":" + e.getMessage());
-					return false;
+					throw new RuntimeException(new LeopardusException(e));
 				}
 			}
 		});

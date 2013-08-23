@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.framework.leopardus.activities.BaseFragmentsActivity;
+import com.framework.leopardus.exceptions.LeopardusException;
 import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.framework.leopardus.interfaces.injection.InjectMenuItem;
 import com.framework.leopardus.interfaces.injection.InjectMethod;
@@ -68,7 +69,7 @@ public class Injector {
 								Object.class, View.class, Method.class);
 						invocable.invoke(ew, obj, v, method);
 					} catch (Exception e) {
-						System.err.println("Error: " + e.getMessage());
+						throw new RuntimeException(new LeopardusException(e));
 					}
 				}
 			}

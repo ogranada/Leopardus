@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.framework.leopardus.R;
+import com.framework.leopardus.activities.BaseFragmentsActivity;
 import com.framework.leopardus.interfaces.InterfacesHelper;
 import com.framework.leopardus.interfaces.MethodInterface;
 import com.framework.leopardus.utils.ImageLoaderTool;
@@ -29,6 +31,15 @@ public class BaseFragment extends SherlockFragment {
 	private String headerImagePath = "";
 	private FadingActionBarHelper fadingHelper;
 	private ImageView headerImg = null;
+	private BaseFragmentsActivity parentActivity;
+	
+	public BaseFragmentsActivity getParentActivity() {
+		return parentActivity;
+	}
+	
+	public void setParentActivity(BaseFragmentsActivity parentActivity) {
+		this.parentActivity = parentActivity;
+	}
 	
 	private void startInjection(View v) {
 		Injector inj = new Injector(v);

@@ -2,12 +2,15 @@ package com.framework.leopardus.activities;
 
 import java.util.Stack;
 
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.OnRefreshListener;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
+import android.view.View;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.framework.leopardus.R;
@@ -28,6 +31,20 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
 
 	Stack<Fragment> fragments = new Stack<Fragment>();
+
+	private PullToRefreshAttacher pullToRefreshAttacher = null;
+
+	/**
+	 * Init PullToRefreshListener fir the provided view
+	 * @param view
+	 * @param onRefreshListener
+	 */
+	public void PullToRefreshInit(View view, OnRefreshListener onRefreshListener) {
+		if (pullToRefreshAttacher == null) {
+			pullToRefreshAttacher = PullToRefreshAttacher.get(this);
+		}
+		pullToRefreshAttacher.addRefreshableView(view, onRefreshListener);
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -122,18 +139,32 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	public void setEnabledMenuOnHome() {
+	/**
+	 * Enable Menu on Home button click
+	 */
+	public void setEnabledMenuOnHomeButton() {
 		this.enableMenuOnHome = true;
 	}
 
-	public void setDisabledMenuOnHome() {
+	/**
+	 * Disable Menu on Home button click
+	 */
+	public void setDisabledMenuOnHomeButton() {
 		this.enableMenuOnHome = true;
 	}
 
-	public boolean isEnabledMenuOnHome() {
+	/**
+	 * Return if is enabled menu on home
+	 * @return
+	 */
+	public boolean isEnabledMenuOnHomeButton() {
 		return enableMenuOnHome;
 	}
 
+	/**
+	 * Return the activity menu
+	 * @return
+	 */
 	public BaseMenuFragment getMenu() {
 		return menuFragment;
 	}
@@ -146,14 +177,17 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		closeCallback = ami;
 	}
 
-	public Activity getMySelf() {
-		return this;
-	}
-
+	/**
+	 * Enable home icon on action bar as button
+	 */
 	public void enableHomeAsButton() {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
+
+	/**
+	 * Disable home icon on action bar as button
+	 */
 	public void disableHomeAsButton() {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 	}
