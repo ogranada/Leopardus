@@ -151,21 +151,21 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	}
 
 	/**
-	 * Enable Menu on Home button click
+	 * Enable toogle Menu on Home button click
 	 */
 	public void setEnabledMenuOnHomeButton() {
 		this.enableMenuOnHome = true;
 	}
 
 	/**
-	 * Disable Menu on Home button click
+	 * Disable toogle Menu on Home button click
 	 */
 	public void setDisabledMenuOnHomeButton() {
 		this.enableMenuOnHome = true;
 	}
 
 	/**
-	 * Return if is enabled menu on home
+	 * Return if is enabled toogle menu on home
 	 * @return
 	 */
 	public boolean isEnabledMenuOnHomeButton() {

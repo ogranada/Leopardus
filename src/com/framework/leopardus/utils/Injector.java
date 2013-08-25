@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
+import com.framework.leopardus.activities.BaseDrawerFragmentsActivity;
 import com.framework.leopardus.activities.BaseFragmentsActivity;
 import com.framework.leopardus.exceptions.LeopardusException;
 import com.framework.leopardus.interfaces.MenuItemEvent;
@@ -77,6 +78,29 @@ public class Injector {
 	}
 
 	public void injectMenuItems(final BaseFragmentsActivity obj) {
+		Method[] methods = obj.getClass().getMethods();
+		for (Method method : methods) {
+			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
+			final Method _method = method;
+			if (i != null) {
+				int menuId = obj.getMenu().addNewItem(obj, i.stringId(),
+						i.iconId());
+				obj.getMenu().addNewEvent(menuId, new MenuItemEvent() {
+
+					@Override
+					public void onListItemClick(ListView lv, View v, long id) {
+						try {
+							_method.invoke(obj, lv, v, id);
+						} catch (Exception e) {
+							Log.e("Leopardus", e.getMessage());
+						}
+					}
+				});
+			}
+		}
+	}
+
+	public void injectMenuItems(final BaseDrawerFragmentsActivity obj) {
 		Method[] methods = obj.getClass().getMethods();
 		for (Method method : methods) {
 			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
