@@ -61,9 +61,9 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		activity = getActivity();
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-		
+		establishItemsAdapter();
 //		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, menuItems.toArray(new String[]{})));
-		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), R.layout.row, menuItems.toArray(new String[]{})));
+//		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), R.layout.row, menuItems.toArray(new String[]{})));
 		listView.setOnItemClickListener(new DrawerItemClickListener());
 		listView.setCacheColorHint(0);
 		listView.setScrollingCacheEnabled(false);
@@ -219,7 +219,8 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	}
 
 	public int addMenuItem(int stringId, int iconId) {
-		return 0;
+		menuItems.add(new Integer[]{stringId, iconId});
+		return menuItems.size();
 	}
 
 }
