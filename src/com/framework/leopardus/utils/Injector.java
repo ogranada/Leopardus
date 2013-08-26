@@ -106,9 +106,9 @@ public class Injector {
 			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
 			final Method _method = method;
 			if (i != null) {
-				int menuId = obj.getMenu().addNewItem(obj, i.stringId(),
+				int menuId = obj.addNewItem(obj, i.stringId(),
 						i.iconId());
-				obj.getMenu().addNewEvent(menuId, new MenuItemEvent() {
+				obj.addNewEvent(menuId, new MenuItemEvent() {
 
 					@Override
 					public void onListItemClick(ListView lv, View v, long id) {
