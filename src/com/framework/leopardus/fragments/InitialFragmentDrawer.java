@@ -32,8 +32,11 @@ import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
 public class InitialFragmentDrawer extends SherlockFragment {
 
-	List<Integer[]> menuItems = new ArrayList<Integer[]>(0);
-	private Map<Integer, MenuItemEvent> menuEvents = new HashMap<Integer, MenuItemEvent>(
+	List<Integer[]> menuItemsLeft = new ArrayList<Integer[]>(0);
+	List<Integer[]> menuItemsRight = new ArrayList<Integer[]>(0);
+	private Map<Integer, MenuItemEvent> menuEventsLeft = new HashMap<Integer, MenuItemEvent>(
+			0);
+	private Map<Integer, MenuItemEvent> menuEventsRight = new HashMap<Integer, MenuItemEvent>(
 			0);
 	private boolean autoExit = false;
 	private Activity activity;
@@ -76,7 +79,13 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		activity = getActivity();
 		establishItemsAdapter();
 		if (leftMenuEnabled) {
-			listViewLeft.setOnItemClickListener(new DrawerItemClickListener());
+			listViewLeft.setOnItemClickListener(new DrawerItemClickListener() {
+
+				@Override
+				protected Ubications getUbication() {
+					return Ubications.LEFT;
+				}
+			});
 			listViewLeft.setCacheColorHint(0);
 			listViewLeft.setScrollingCacheEnabled(false);
 			listViewLeft.setScrollContainer(false);
@@ -87,7 +96,13 @@ public class InitialFragmentDrawer extends SherlockFragment {
 			mDrawerLayout.removeView(listViewLeft);
 		}
 		if (rightMenuEnabled) {
-			listViewRight.setOnItemClickListener(new DrawerItemClickListener());
+			listViewRight.setOnItemClickListener(new DrawerItemClickListener() {
+
+				@Override
+				protected Ubications getUbication() {
+					return Ubications.RIGHT;
+				}
+			});
 			listViewRight.setCacheColorHint(0);
 			listViewRight.setScrollingCacheEnabled(false);
 			listViewRight.setScrollContainer(false);
@@ -120,14 +135,15 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	private void establishItemsAdapter() {
 		ItemsAdapter leftAdapter = new ItemsAdapter(activity);
 		ItemsAdapter rightAdapter = new ItemsAdapter(activity);
-		int size = menuItems.size();
+		int size = menuItemsLeft.size();
 		for (int i = 0; i < size; i++) {
-			Integer[] item = menuItems.get(i);
-			if(item[2]==Ubications.RIGHT.ordinal()){
-				rightAdapter.add(new ApplicationMenuItem(item[0], item[1]));
-			}else{
-				leftAdapter.add(new ApplicationMenuItem(item[0], item[1]));
-			}
+			Integer[] item = menuItemsLeft.get(i);
+			leftAdapter.add(new ApplicationMenuItem(item[0], item[1]));
+		}
+		size = menuItemsRight.size();
+		for (int i = 0; i < size; i++) {
+			Integer[] item = menuItemsRight.get(i);
+			rightAdapter.add(new ApplicationMenuItem(item[0], item[1]));
 		}
 		if (autoExit) {
 			leftAdapter.add(new ApplicationMenuItem(R.string.quit,
@@ -156,7 +172,8 @@ public class InitialFragmentDrawer extends SherlockFragment {
 				return true;
 			}
 		} catch (Exception e) {
-			Log.e("Leopardus","Trying toggle left menu, but it doesn't enabled");
+			Log.e("Leopardus",
+					"Trying toggle left menu, but it doesn't enabled");
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -172,25 +189,31 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	 * changing the primary content text. The drawer is closed when a selection
 	 * is made.
 	 */
-	private class DrawerItemClickListener implements
+	private abstract class DrawerItemClickListener implements
 			ListView.OnItemClickListener {
 		// listViewLeft lv, View v, int position, long id
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			// TODO:
-			// ////////////////////////////////
-			// mContent.setText("Content " + menuItems.get(position) + " "
-			// + position);
+			Map<Integer, MenuItemEvent> menuEvents = menuEventsLeft;
+			if (getUbication().equals(Ubications.RIGHT)) {
+				menuEvents = menuEventsRight;
+				mActionBar.setTitle(activity.getResources().getString(
+						menuItemsRight.get(position)[0]));
+				mDrawerLayout.closeDrawer(listViewLeft);
+			} else {
+				mActionBar.setTitle(activity.getResources().getString(
+						menuItemsLeft.get(position)[0]));
+				mDrawerLayout.closeDrawer(listViewLeft);
+			}
 			if (menuEvents.containsKey(Integer.valueOf(position))) {
 				MenuItemEvent evt = menuEvents.get(position);
 				evt.onListItemClick(parent, view, id);
 			}
-			// ////////////////////////////////
-			mActionBar.setTitle(activity.getResources().getString(
-					menuItems.get(position)[0]));
-			mDrawerLayout.closeDrawer(listViewLeft);
 		}
+
+		protected abstract Ubications getUbication();
+
 	}
 
 	/**
@@ -279,6 +302,7 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	}
 
 	public int addMenuItem(int stringId, int iconId, Ubications ubication) {
+		List<Integer[]> menuItems = ubication.equals(Ubications.LEFT) ? menuItemsLeft : menuItemsRight;
 		menuItems.add(new Integer[] { stringId, iconId, ubication.ordinal() });
 		return menuItems.size() - 1;
 	}
@@ -296,8 +320,13 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		}
 	}
 
-	public void addNewEvent(int menuId, MenuItemEvent menuItemEvent) {
-		menuEvents.put(menuId, menuItemEvent);
+	public void addNewEvent(int menuId, Ubications ubication,
+			MenuItemEvent menuItemEvent) {
+		if (ubication.equals(Ubications.LEFT)) {
+			menuEventsLeft.put(menuId, menuItemEvent);
+		} else {
+			menuEventsRight.put(menuId, menuItemEvent);
+		}
 	}
 
 	public void setLeftMenuEnabled(boolean leftMenuEnabled) {

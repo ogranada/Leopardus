@@ -11,6 +11,7 @@ import android.widget.ListView;
 
 import com.framework.leopardus.activities.BaseDrawerFragmentsActivity;
 import com.framework.leopardus.activities.BaseFragmentsActivity;
+import com.framework.leopardus.enums.Ubications;
 import com.framework.leopardus.exceptions.LeopardusException;
 import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.framework.leopardus.interfaces.injection.InjectMenuItem;
@@ -108,7 +109,7 @@ public class Injector {
 			final Method _method = method;
 			if (i != null) {
 				int menuId = obj.addNewItem(obj, i.stringId(), i.iconId(), i.ubication());
-				obj.addNewEvent(menuId, new MenuItemEvent() {
+				obj.addNewEvent(menuId, i.ubication(), new MenuItemEvent() {
 
 					@Override
 					public void onListItemClick(Object lv, View v, long id) {

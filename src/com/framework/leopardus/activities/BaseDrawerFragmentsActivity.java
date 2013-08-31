@@ -66,8 +66,8 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 		return instance.addMenuItem(stringId, iconId, u);
 	}
 
-	public void addNewEvent(int menuId, MenuItemEvent menuItemEvent) {
-		instance.addNewEvent(menuId, menuItemEvent);
+	public void addNewEvent(int menuId, Ubications ubication, MenuItemEvent menuItemEvent) {
+		instance.addNewEvent(menuId, ubication, menuItemEvent);
 	}
 
 	public void setActualFragment(Fragment fragment) {
