@@ -1,4 +1,4 @@
-package com.framework.leopardus.utils;
+package com.framework.leopardus.enums;
 
 public enum InjectableMethods {
 	/**

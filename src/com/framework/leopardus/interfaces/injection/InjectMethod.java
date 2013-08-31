@@ -6,9 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import android.view.View.OnClickListener;
-
-import com.framework.leopardus.utils.InjectableMethods;
+import com.framework.leopardus.enums.InjectableMethods;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

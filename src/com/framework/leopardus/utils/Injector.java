@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.framework.leopardus.activities.BaseDrawerFragmentsActivity;
@@ -28,7 +29,7 @@ public class Injector {
 
 	public Injector(Context c) {
 		view = null;
-		context = c;		
+		context = c;
 	}
 
 	public void injectViews(Object obj) {
@@ -88,9 +89,9 @@ public class Injector {
 				obj.getMenu().addNewEvent(menuId, new MenuItemEvent() {
 
 					@Override
-					public void onListItemClick(ListView lv, View v, long id) {
+					public void onListItemClick(Object lv, View v, long id) {
 						try {
-							_method.invoke(obj, lv, v, id);
+							_method.invoke(obj, (ListView) lv, v, id);
 						} catch (Exception e) {
 							Log.e("Leopardus", e.getMessage());
 						}
@@ -106,14 +107,13 @@ public class Injector {
 			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
 			final Method _method = method;
 			if (i != null) {
-				int menuId = obj.addNewItem(obj, i.stringId(),
-						i.iconId());
+				int menuId = obj.addNewItem(obj, i.stringId(), i.iconId(), i.ubication());
 				obj.addNewEvent(menuId, new MenuItemEvent() {
 
 					@Override
-					public void onListItemClick(ListView lv, View v, long id) {
+					public void onListItemClick(Object lv, View v, long id) {
 						try {
-							_method.invoke(obj, lv, v, id);
+							_method.invoke(obj, (AdapterView) lv, v, id);
 						} catch (Exception e) {
 							Log.e("Leopardus", e.getMessage());
 						}

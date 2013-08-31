@@ -1,20 +1,21 @@
 package com.framework.leopardus.fragments;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -25,20 +26,30 @@ import com.actionbarsherlock.view.MenuItem;
 import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
 import com.framework.leopardus.adapters.ItemsAdapter;
+import com.framework.leopardus.enums.Ubications;
+import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
 public class InitialFragmentDrawer extends SherlockFragment {
 
 	List<Integer[]> menuItems = new ArrayList<Integer[]>(0);
+	private Map<Integer, MenuItemEvent> menuEvents = new HashMap<Integer, MenuItemEvent>(
+			0);
 	private boolean autoExit = false;
 	private Activity activity;
 	private DrawerLayout mDrawerLayout;
-	private ListView listView;
-	private TextView mContent;
+	private ListView listViewLeft;
+	private ListView listViewRight;
+	private int title = -1;
+	// private TextView mContent;
+	boolean leftMenuEnabled = true;
+	boolean rightMenuEnabled = false;
 
 	private ActionBarHelper mActionBar;
 
 	private SherlockActionBarDrawerToggle mDrawerToggle;
+	private android.view.ViewGroup.LayoutParams rightMenuParams;
+	private android.view.ViewGroup.LayoutParams leftMenuParams;
 
 	public static InitialFragmentDrawer newInstance() {
 		return new InitialFragmentDrawer();
@@ -52,54 +63,84 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.activity_fragment_drawer, container, false);
-
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.activity_fragment_drawer,
+				container, false);
 		mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
-		listView = (ListView) view.findViewById(R.id.left_drawer);
-		mContent = (TextView) view.findViewById(R.id.content_text);
-		activity = getActivity();
+		listViewLeft = (ListView) view.findViewById(R.id.drawer_menu_left);
+		listViewRight = (ListView) view.findViewById(R.id.drawer_menu_right);
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
+				GravityCompat.START);
+		activity = getActivity();
 		establishItemsAdapter();
-//		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, menuItems.toArray(new String[]{})));
-//		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), R.layout.row, menuItems.toArray(new String[]{})));
-		listView.setOnItemClickListener(new DrawerItemClickListener());
-		listView.setCacheColorHint(0);
-		listView.setScrollingCacheEnabled(false);
-		listView.setScrollContainer(false);
-		listView.setFastScrollEnabled(true);
-		listView.setSmoothScrollbarEnabled(true);
+		if (leftMenuEnabled) {
+			listViewLeft.setOnItemClickListener(new DrawerItemClickListener());
+			listViewLeft.setCacheColorHint(0);
+			listViewLeft.setScrollingCacheEnabled(false);
+			listViewLeft.setScrollContainer(false);
+			listViewLeft.setFastScrollEnabled(true);
+			listViewLeft.setSmoothScrollbarEnabled(true);
+		} else {
+			this.rightMenuParams = listViewLeft.getLayoutParams();
+			mDrawerLayout.removeView(listViewLeft);
+		}
+		if (rightMenuEnabled) {
+			listViewRight.setOnItemClickListener(new DrawerItemClickListener());
+			listViewRight.setCacheColorHint(0);
+			listViewRight.setScrollingCacheEnabled(false);
+			listViewRight.setScrollContainer(false);
+			listViewRight.setFastScrollEnabled(true);
+			listViewRight.setSmoothScrollbarEnabled(true);
+		} else {
+			this.rightMenuParams = listViewRight.getLayoutParams();
+			mDrawerLayout.removeView(listViewRight);
+		}
 
 		mActionBar = createActionBarHelper();
 		mActionBar.init();
+
+		if (title != -1) {
+			mActionBar.setTitle(activity.getResources().getString(title));
+			title = -1;
+		}
 
 		// ActionBarDrawerToggle provides convenient helpers for tying together
 		// the
 		// prescribed interactions between a top-level sliding drawer and the
 		// action bar.
-		mDrawerToggle = new SherlockActionBarDrawerToggle(this.getActivity(), mDrawerLayout, R.drawable.ic_drawer_light, R.string.drawer_open, R.string.drawer_close);
+		mDrawerToggle = new SherlockActionBarDrawerToggle(this.getActivity(),
+				mDrawerLayout, R.drawable.ic_drawer_light,
+				R.string.drawer_open, R.string.drawer_close);
 		mDrawerToggle.syncState();
 		return view;
 	}
 
 	private void establishItemsAdapter() {
-		ItemsAdapter adapter = new ItemsAdapter(activity);
+		ItemsAdapter leftAdapter = new ItemsAdapter(activity);
+		ItemsAdapter rightAdapter = new ItemsAdapter(activity);
 		int size = menuItems.size();
 		for (int i = 0; i < size; i++) {
 			Integer[] item = menuItems.get(i);
-			adapter.add(new ApplicationMenuItem(item[0], item[1]));
+			if(item[2]==Ubications.RIGHT.ordinal()){
+				rightAdapter.add(new ApplicationMenuItem(item[0], item[1]));
+			}else{
+				leftAdapter.add(new ApplicationMenuItem(item[0], item[1]));
+			}
 		}
 		if (autoExit) {
-			adapter.add(new ApplicationMenuItem(R.string.quit,
+			leftAdapter.add(new ApplicationMenuItem(R.string.quit,
 					R.drawable.ico_dark_quit));
 		}
-		listView.setAdapter(adapter);
+		listViewLeft.setAdapter(leftAdapter);
+		listViewRight.setAdapter(rightAdapter);
 	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater = ((SherlockFragmentActivity)getActivity()).getSupportMenuInflater();
+		inflater = ((SherlockFragmentActivity) getActivity())
+				.getSupportMenuInflater();
 		inflater.inflate(R.menu.main, menu);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
@@ -110,8 +151,12 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		 * The action bar home/up action should open or close the drawer.
 		 * mDrawerToggle will take care of this.
 		 */
-		if (mDrawerToggle.onOptionsItemSelected(item)) {
-			return true;
+		try {
+			if (mDrawerToggle.onOptionsItemSelected(item)) {
+				return true;
+			}
+		} catch (Exception e) {
+			Log.e("Leopardus","Trying toggle left menu, but it doesn't enabled");
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -127,12 +172,24 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	 * changing the primary content text. The drawer is closed when a selection
 	 * is made.
 	 */
-	private class DrawerItemClickListener implements ListView.OnItemClickListener {
+	private class DrawerItemClickListener implements
+			ListView.OnItemClickListener {
+		// listViewLeft lv, View v, int position, long id
 		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			mContent.setText("Content "+menuItems.get(position)+" "+position);
-			mActionBar.setTitle(activity.getResources().getString(menuItems.get(position)[0]));
-			mDrawerLayout.closeDrawer(listView);
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			// TODO:
+			// ////////////////////////////////
+			// mContent.setText("Content " + menuItems.get(position) + " "
+			// + position);
+			if (menuEvents.containsKey(Integer.valueOf(position))) {
+				MenuItemEvent evt = menuEvents.get(position);
+				evt.onListItemClick(parent, view, id);
+			}
+			// ////////////////////////////////
+			mActionBar.setTitle(activity.getResources().getString(
+					menuItems.get(position)[0]));
+			mDrawerLayout.closeDrawer(listViewLeft);
 		}
 	}
 
@@ -178,15 +235,14 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		return new ActionBarHelper();
 	}
 
-
-
 	private class ActionBarHelper {
 		private final ActionBar mActionBar;
 		private CharSequence mDrawerTitle;
 		private CharSequence mTitle;
 
 		private ActionBarHelper() {
-			mActionBar = ((SherlockFragmentActivity)getActivity()).getSupportActionBar();
+			mActionBar = ((SherlockFragmentActivity) getActivity())
+					.getSupportActionBar();
 		}
 
 		public void init() {
@@ -219,8 +275,53 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	}
 
 	public int addMenuItem(int stringId, int iconId) {
-		menuItems.add(new Integer[]{stringId, iconId});
-		return menuItems.size();
+		return addMenuItem(stringId, iconId, Ubications.LEFT);
+	}
+
+	public int addMenuItem(int stringId, int iconId, Ubications ubication) {
+		menuItems.add(new Integer[] { stringId, iconId, ubication.ordinal() });
+		return menuItems.size() - 1;
+	}
+
+	public void addFragment(int stringId, BaseFragmentDrawer bfd) {
+		getFragmentManager().beginTransaction()
+				.replace(R.id.content_section, bfd).commit();
+		if (mActionBar != null) {
+			mActionBar.setTitle(activity.getResources().getString(stringId));
+		} else {
+			title = stringId;
+		}
+		if (mDrawerLayout != null) {
+			mDrawerLayout.closeDrawer(listViewLeft);
+		}
+	}
+
+	public void addNewEvent(int menuId, MenuItemEvent menuItemEvent) {
+		menuEvents.put(menuId, menuItemEvent);
+	}
+
+	public void setLeftMenuEnabled(boolean leftMenuEnabled) {
+		this.leftMenuEnabled = leftMenuEnabled;
+		if (mDrawerLayout != null) {
+			if (!leftMenuEnabled) {
+				mDrawerLayout.removeView(listViewLeft);
+				this.leftMenuParams = listViewLeft.getLayoutParams();
+			} else {
+				mDrawerLayout.addView(listViewRight, this.leftMenuParams);
+			}
+		}
+	}
+
+	public void setRightMenuEnabled(boolean rightMenuEnabled) {
+		this.rightMenuEnabled = rightMenuEnabled;
+		if (mDrawerLayout != null) {
+			if (!rightMenuEnabled) {
+				this.rightMenuParams = listViewRight.getLayoutParams();
+				mDrawerLayout.removeView(listViewRight);
+			} else {
+				mDrawerLayout.addView(listViewRight, this.rightMenuParams);
+			}
+		}
 	}
 
 }

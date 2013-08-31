@@ -4,5 +4,5 @@ import android.view.View;
 import android.widget.ListView;
 
 public interface MenuItemEvent {
-	void onListItemClick(ListView lv, View v, long id);
+	void onListItemClick(Object lv, View v, long id);
 }

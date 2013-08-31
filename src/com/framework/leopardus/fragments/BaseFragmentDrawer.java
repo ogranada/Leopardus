@@ -19,6 +19,16 @@ import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
 public class BaseFragmentDrawer extends SherlockFragment {
 
+	int layout = R.layout.base_layout;
+			
+	public BaseFragmentDrawer() {
+		
+	}
+	
+	public BaseFragmentDrawer(int lyt) {
+		layout = lyt;
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -29,7 +39,7 @@ public class BaseFragmentDrawer extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.base_layout, container, false);
+		View view = inflater.inflate(layout, container, false);
 		return view;
 	}
 	
