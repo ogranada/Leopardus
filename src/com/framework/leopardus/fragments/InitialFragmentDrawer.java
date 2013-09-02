@@ -50,9 +50,10 @@ public class InitialFragmentDrawer extends SherlockFragment {
 
 	private ActionBarHelper mActionBar;
 
-	private SherlockActionBarDrawerToggle mDrawerToggle;
+	private SherlockActionBarDrawerToggle mDrawerToggle; // TODO
 	private android.view.ViewGroup.LayoutParams rightMenuParams;
 	private android.view.ViewGroup.LayoutParams leftMenuParams;
+	private boolean enableMenuOnHome;
 
 	public static InitialFragmentDrawer newInstance() {
 		return new InitialFragmentDrawer();
@@ -200,7 +201,7 @@ public class InitialFragmentDrawer extends SherlockFragment {
 				menuEvents = menuEventsRight;
 				mActionBar.setTitle(activity.getResources().getString(
 						menuItemsRight.get(position)[0]));
-				mDrawerLayout.closeDrawer(listViewLeft);
+				mDrawerLayout.closeDrawer(listViewRight);
 			} else {
 				mActionBar.setTitle(activity.getResources().getString(
 						menuItemsLeft.get(position)[0]));
@@ -209,6 +210,7 @@ public class InitialFragmentDrawer extends SherlockFragment {
 			if (menuEvents.containsKey(Integer.valueOf(position))) {
 				MenuItemEvent evt = menuEvents.get(position);
 				evt.onListItemClick(parent, view, id);
+				
 			}
 		}
 
@@ -270,10 +272,14 @@ public class InitialFragmentDrawer extends SherlockFragment {
 
 		public void init() {
 			mActionBar.setDisplayHomeAsUpEnabled(true);
-			mActionBar.setHomeButtonEnabled(true);
+			mActionBar.setHomeButtonEnabled(enableMenuOnHome);
 			mTitle = mDrawerTitle = getActivity().getTitle();
 		}
 
+		public void setHomeButtonEnabled(boolean enabled){
+			mActionBar.setHomeButtonEnabled(enabled);
+		}
+		
 		/**
 		 * When the drawer is closed we restore the action bar state reflecting
 		 * the specific contents in view.
@@ -351,6 +357,31 @@ public class InitialFragmentDrawer extends SherlockFragment {
 				mDrawerLayout.addView(listViewRight, this.rightMenuParams);
 			}
 		}
+	}
+
+
+	/**
+	 * Enable toogle Menu on Home button click
+	 */
+	public void setEnabledMenuOnHomeButton() {
+		this.enableMenuOnHome = true;
+		mActionBar.setHomeButtonEnabled(enableMenuOnHome);
+	}
+
+	/**
+	 * Disable toogle Menu on Home button click
+	 */
+	public void setDisabledMenuOnHomeButton() {
+		this.enableMenuOnHome = false;
+		mActionBar.setHomeButtonEnabled(enableMenuOnHome);
+	}
+
+	/**
+	 * Return if is enabled toogle menu on home
+	 * @return
+	 */
+	public boolean isEnabledMenuOnHomeButton() {
+		return enableMenuOnHome;
 	}
 
 }

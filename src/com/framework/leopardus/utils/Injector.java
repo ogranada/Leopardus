@@ -11,7 +11,6 @@ import android.widget.ListView;
 
 import com.framework.leopardus.activities.BaseDrawerFragmentsActivity;
 import com.framework.leopardus.activities.BaseFragmentsActivity;
-import com.framework.leopardus.enums.Ubications;
 import com.framework.leopardus.exceptions.LeopardusException;
 import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.framework.leopardus.interfaces.injection.InjectMenuItem;
@@ -102,6 +101,7 @@ public class Injector {
 		}
 	}
 
+	@SuppressWarnings("all")
 	public void injectMenuItems(final BaseDrawerFragmentsActivity obj) {
 		Method[] methods = obj.getClass().getMethods();
 		for (Method method : methods) {
@@ -114,7 +114,7 @@ public class Injector {
 					@Override
 					public void onListItemClick(Object lv, View v, long id) {
 						try {
-							_method.invoke(obj, (AdapterView) lv, v, id);
+							_method.invoke(obj, ((AdapterView) lv), v, id);
 						} catch (Exception e) {
 							Log.e("Leopardus", e.getMessage());
 						}
@@ -124,4 +124,7 @@ public class Injector {
 		}
 	}
 
+	// TODO: inject action modes
+	// TODO: change menus lists' by Maps
+	// TODO: inject WebView javascript methods
 }

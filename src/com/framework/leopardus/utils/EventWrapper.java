@@ -2,14 +2,13 @@ package com.framework.leopardus.utils;
 
 import java.lang.reflect.Method;
 
-import com.framework.leopardus.exceptions.LeopardusException;
-
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+
+import com.framework.leopardus.exceptions.LeopardusException;
 
 public class EventWrapper {
 
