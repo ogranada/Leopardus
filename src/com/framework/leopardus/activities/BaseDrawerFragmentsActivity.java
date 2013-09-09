@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.ContextMenu;
 import android.view.View;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
@@ -40,6 +41,7 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 			requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		}
 		setContentView(R.layout.activity_drawer);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		if (enableProgressFeatures) {
 			setSupportProgressBarIndeterminateVisibility(false);
 			setSupportProgressBarVisibility(false);
@@ -99,6 +101,14 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 		instance.setRightMenuEnabled(rightMenuEnabled);
 	}
 
+
+	/**
+	 * Enable home icon on action bar as button
+	 */
+	public void enableHomeAsButton() {
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+	}
+	
 	/**
 	 * Enable toogle Menu on Home button click
 	 */
@@ -154,6 +164,13 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 		}
 	}
 
+	public void enableAutoExit() {
+		instance.enableAutoExit();
+	}
+
+	public void disableAutoExit() {
+		instance.disableAutoExit();
+	}
 	////////////////////////////////////////////////////////
 	
 	
@@ -170,9 +187,9 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// menu.add("Save")
-		// .setIcon(R.drawable.ic_drawer_dark)
-		// .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+//		 menu.add("Save")
+//		 .setIcon(R.drawable.ic_drawer_dark)
+//		 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -181,23 +198,27 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 		// This uses the imported MenuItem from ActionBarSherlock
 		// Toast.makeText(this, "Got click: " + item.toString(),
 		// Toast.LENGTH_SHORT).show();
-		return true;
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			if(instance.isEnabledMenuOnHomeButton()){
+				instance.toggleLeftMenu();
+			}
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenu.ContextMenuInfo menuInfo) {
-		// menu.add("One");
-		// menu.add("Two");
-		// menu.add("Three");
-		// menu.add("Four");
+//		 menuonOptionsItemSelectednu.add("Four");
 	}
 
 	@Override
 	public boolean onContextItemSelected(android.view.MenuItem item) {
 		// Note how this callback is using the fully-qualified class name
-		// Toast.makeText(this, "Got click: " + item.toString(),
-		// Toast.LENGTH_SHORT).show();
+//		 Toast.makeText(this, "Got click: " + item.toString(),
+//		 Toast.LENGTH_SHORT).show();
 		return true;
 	}
 

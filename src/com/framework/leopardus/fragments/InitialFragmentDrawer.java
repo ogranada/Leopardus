@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.R.bool;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
 import com.framework.leopardus.adapters.ItemsAdapter;
 import com.framework.leopardus.enums.Ubications;
+import com.framework.leopardus.interfaces.ActivityMethodInterface;
+import com.framework.leopardus.interfaces.InterfacesHelper;
 import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
@@ -47,6 +50,9 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	// private TextView mContent;
 	boolean leftMenuEnabled = true;
 	boolean rightMenuEnabled = false;
+	// /////////////////////////
+	boolean leftMenuOpened = false;
+	boolean rightMenuOpened = false;
 
 	private ActionBarHelper mActionBar;
 
@@ -54,6 +60,7 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	private android.view.ViewGroup.LayoutParams rightMenuParams;
 	private android.view.ViewGroup.LayoutParams leftMenuParams;
 	private boolean enableMenuOnHome;
+	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
 
 	public static InitialFragmentDrawer newInstance() {
 		return new InitialFragmentDrawer();
@@ -121,7 +128,7 @@ public class InitialFragmentDrawer extends SherlockFragment {
 			mActionBar.setTitle(activity.getResources().getString(title));
 			title = -1;
 		}
-
+		mActionBar.setHomeButtonEnabled(enableMenuOnHome);
 		// ActionBarDrawerToggle provides convenient helpers for tying together
 		// the
 		// prescribed interactions between a top-level sliding drawer and the
@@ -146,10 +153,31 @@ public class InitialFragmentDrawer extends SherlockFragment {
 			Integer[] item = menuItemsRight.get(i);
 			rightAdapter.add(new ApplicationMenuItem(item[0], item[1]));
 		}
+//		if (autoExit) {
+//			menuItemsLeft.add(new Integer[]{R.string.quit,
+//					R.drawable.ico_dark_quit});
+//			leftAdapter.add(new ApplicationMenuItem(R.string.quit,
+//					R.drawable.ico_dark_quit));
+////			menuEventsLeft.put(le, value)
+//			addMenuItem(R.string.quit,
+//					R.drawable.ico_dark_quit, Ubications.LEFT);
+//		}
+		// TODO:
 		if (autoExit) {
+			int pos = addMenuItem(R.string.quit,
+					R.drawable.ico_dark_quit, Ubications.LEFT);
+//			int pos = menuEventsLeft.size();
 			leftAdapter.add(new ApplicationMenuItem(R.string.quit,
 					R.drawable.ico_dark_quit));
+			addNewEvent(pos, Ubications.LEFT, new MenuItemEvent() {
+				
+				@Override
+				public void onListItemClick(Object lv, View v, long id) {
+					closeCallback.Method(getActivity());
+				}
+			});
 		}
+		
 		listViewLeft.setAdapter(leftAdapter);
 		listViewRight.setAdapter(rightAdapter);
 	}
@@ -197,20 +225,24 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			Map<Integer, MenuItemEvent> menuEvents = menuEventsLeft;
+			ListView listView = listViewLeft;
+			String ttl = "";
 			if (getUbication().equals(Ubications.RIGHT)) {
 				menuEvents = menuEventsRight;
-				mActionBar.setTitle(activity.getResources().getString(
-						menuItemsRight.get(position)[0]));
-				mDrawerLayout.closeDrawer(listViewRight);
+				ttl = activity.getResources().getString(
+						menuItemsRight.get(position)[0]);
+				listView = listViewRight;
 			} else {
-				mActionBar.setTitle(activity.getResources().getString(
-						menuItemsLeft.get(position)[0]));
-				mDrawerLayout.closeDrawer(listViewLeft);
+				menuEvents = menuEventsLeft;
+				ttl = activity.getResources().getString(
+						menuItemsLeft.get(position)[0]);
+				listView = listViewLeft;
 			}
 			if (menuEvents.containsKey(Integer.valueOf(position))) {
+				mActionBar.setTitle(ttl);
 				MenuItemEvent evt = menuEvents.get(position);
 				evt.onListItemClick(parent, view, id);
-				
+				mDrawerLayout.closeDrawer(listView);
 			}
 		}
 
@@ -233,12 +265,22 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		public void onDrawerOpened(View drawerView) {
 			mDrawerToggle.onDrawerOpened(drawerView);
 			mActionBar.onDrawerOpened();
+			if (drawerView.equals(listViewLeft)) {
+				leftMenuOpened = true;
+			} else {
+				rightMenuOpened = true;
+			}
 		}
 
 		@Override
 		public void onDrawerClosed(View drawerView) {
 			mDrawerToggle.onDrawerClosed(drawerView);
 			mActionBar.onDrawerClosed();
+			if (drawerView.equals(listViewLeft)) {
+				leftMenuOpened = false;
+			} else {
+				rightMenuOpened = false;
+			}
 		}
 
 		@Override
@@ -271,15 +313,15 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		}
 
 		public void init() {
-			mActionBar.setDisplayHomeAsUpEnabled(true);
+			// mActionBar.setDisplayHomeAsUpEnabled(true);
 			mActionBar.setHomeButtonEnabled(enableMenuOnHome);
 			mTitle = mDrawerTitle = getActivity().getTitle();
 		}
 
-		public void setHomeButtonEnabled(boolean enabled){
+		public void setHomeButtonEnabled(boolean enabled) {
 			mActionBar.setHomeButtonEnabled(enabled);
 		}
-		
+
 		/**
 		 * When the drawer is closed we restore the action bar state reflecting
 		 * the specific contents in view.
@@ -308,7 +350,8 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	}
 
 	public int addMenuItem(int stringId, int iconId, Ubications ubication) {
-		List<Integer[]> menuItems = ubication.equals(Ubications.LEFT) ? menuItemsLeft : menuItemsRight;
+		List<Integer[]> menuItems = ubication.equals(Ubications.LEFT) ? menuItemsLeft
+				: menuItemsRight;
 		menuItems.add(new Integer[] { stringId, iconId, ubication.ordinal() });
 		return menuItems.size() - 1;
 	}
@@ -359,13 +402,14 @@ public class InitialFragmentDrawer extends SherlockFragment {
 		}
 	}
 
-
 	/**
 	 * Enable toogle Menu on Home button click
 	 */
 	public void setEnabledMenuOnHomeButton() {
 		this.enableMenuOnHome = true;
-		mActionBar.setHomeButtonEnabled(enableMenuOnHome);
+		if (mActionBar != null) {
+			mActionBar.setHomeButtonEnabled(enableMenuOnHome);
+		}
 	}
 
 	/**
@@ -373,15 +417,41 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	 */
 	public void setDisabledMenuOnHomeButton() {
 		this.enableMenuOnHome = false;
-		mActionBar.setHomeButtonEnabled(enableMenuOnHome);
+		if (mActionBar != null) {
+			mActionBar.setHomeButtonEnabled(enableMenuOnHome);
+		}
 	}
 
 	/**
 	 * Return if is enabled toogle menu on home
+	 * 
 	 * @return
 	 */
 	public boolean isEnabledMenuOnHomeButton() {
 		return enableMenuOnHome;
 	}
 
+	public void toggleLeftMenu() {
+		if (leftMenuOpened) {
+			mDrawerLayout.closeDrawer(listViewLeft);
+		} else {
+			mDrawerLayout.openDrawer(listViewLeft);
+		}
+	}
+
+	public void toggleRightMenu() {
+		if (rightMenuOpened) {
+			mDrawerLayout.closeDrawer(listViewRight);
+		} else {
+			mDrawerLayout.openDrawer(listViewRight);
+		}
+	}
+
+	public void enableAutoExit() {
+		autoExit = true;
+	}
+
+	public void disableAutoExit() {
+		autoExit = false;
+	}
 }

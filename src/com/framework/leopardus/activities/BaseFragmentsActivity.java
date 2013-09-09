@@ -242,6 +242,13 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		}
 	}
 
+	public void enableAutoExit() {
+		getMenu().enableAutoExit();
+	}
+
+	public void disableAutoExit() {
+		getMenu().disableAutoExit();
+	}
 	////////////////////////////////////////////////////////
 
 	public void startActionMode(
