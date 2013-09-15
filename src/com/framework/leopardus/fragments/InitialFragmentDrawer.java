@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.R.bool;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -29,10 +29,11 @@ import com.framework.leopardus.adapters.ApplicationMenuItem;
 import com.framework.leopardus.adapters.ItemsAdapter;
 import com.framework.leopardus.enums.Ubications;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
-import com.framework.leopardus.interfaces.InterfacesHelper;
 import com.framework.leopardus.interfaces.MenuItemEvent;
+import com.framework.leopardus.utils.InterfacesHelper;
 import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
+@SuppressLint("UseSparseArrays")
 public class InitialFragmentDrawer extends SherlockFragment {
 
 	List<Integer[]> menuItemsLeft = new ArrayList<Integer[]>(0);
@@ -153,31 +154,31 @@ public class InitialFragmentDrawer extends SherlockFragment {
 			Integer[] item = menuItemsRight.get(i);
 			rightAdapter.add(new ApplicationMenuItem(item[0], item[1]));
 		}
-//		if (autoExit) {
-//			menuItemsLeft.add(new Integer[]{R.string.quit,
-//					R.drawable.ico_dark_quit});
-//			leftAdapter.add(new ApplicationMenuItem(R.string.quit,
-//					R.drawable.ico_dark_quit));
-////			menuEventsLeft.put(le, value)
-//			addMenuItem(R.string.quit,
-//					R.drawable.ico_dark_quit, Ubications.LEFT);
-//		}
+		// if (autoExit) {
+		// menuItemsLeft.add(new Integer[]{R.string.quit,
+		// R.drawable.ico_dark_quit});
+		// leftAdapter.add(new ApplicationMenuItem(R.string.quit,
+		// R.drawable.ico_dark_quit));
+		// // menuEventsLeft.put(le, value)
+		// addMenuItem(R.string.quit,
+		// R.drawable.ico_dark_quit, Ubications.LEFT);
+		// }
 		// TODO:
 		if (autoExit) {
-			int pos = addMenuItem(R.string.quit,
-					R.drawable.ico_dark_quit, Ubications.LEFT);
-//			int pos = menuEventsLeft.size();
+			int pos = addMenuItem(R.string.quit, R.drawable.ico_dark_quit,
+					Ubications.LEFT);
+			// int pos = menuEventsLeft.size();
 			leftAdapter.add(new ApplicationMenuItem(R.string.quit,
 					R.drawable.ico_dark_quit));
 			addNewEvent(pos, Ubications.LEFT, new MenuItemEvent() {
-				
+
 				@Override
 				public void onListItemClick(Object lv, View v, long id) {
 					closeCallback.Method(getActivity());
 				}
 			});
 		}
-		
+
 		listViewLeft.setAdapter(leftAdapter);
 		listViewRight.setAdapter(rightAdapter);
 	}
@@ -454,4 +455,9 @@ public class InitialFragmentDrawer extends SherlockFragment {
 	public void disableAutoExit() {
 		autoExit = false;
 	}
+
+	public void setOnCloseEvent(ActivityMethodInterface ami) {
+		closeCallback = ami;
+	}
+
 }

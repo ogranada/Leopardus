@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.ContextMenu;
 import android.view.View;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
@@ -93,6 +92,10 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 		finish();
 	}
 
+	public void setOnCloseEvent(ActivityMethodInterface ami) {
+		instance.setOnCloseEvent(ami);
+	}
+	
 	public void setLeftMenuEnabled(boolean leftMenuEnabled) {
 		instance.setLeftMenuEnabled(leftMenuEnabled);
 	}

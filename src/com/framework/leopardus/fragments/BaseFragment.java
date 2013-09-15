@@ -11,10 +11,10 @@ import android.widget.ImageView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.framework.leopardus.R;
 import com.framework.leopardus.activities.BaseFragmentsActivity;
-import com.framework.leopardus.interfaces.InterfacesHelper;
 import com.framework.leopardus.interfaces.MethodInterface;
 import com.framework.leopardus.utils.ImageLoaderTool;
 import com.framework.leopardus.utils.Injector;
+import com.framework.leopardus.utils.InterfacesHelper;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
 public class BaseFragment extends SherlockFragment {

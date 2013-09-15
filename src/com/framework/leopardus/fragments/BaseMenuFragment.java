@@ -69,7 +69,7 @@ public class BaseMenuFragment extends ListFragment {
 	 * Disable the exit Item
 	 */
 	public void disableAutoExit() {
-		autoExit = true;
+		autoExit = false;
 	}
 
 	/**

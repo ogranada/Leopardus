@@ -84,16 +84,16 @@ public class Injector {
 			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
 			final Method _method = method;
 			if (i != null) {
-				int menuId = obj.getMenu().addNewItem(obj, i.stringId(),
+				int menuId = obj.getMenu(i.ubication()).addNewItem(obj, i.stringId(),
 						i.iconId());
-				obj.getMenu().addNewEvent(menuId, new MenuItemEvent() {
+				obj.getMenu(i.ubication()).addNewEvent(menuId, new MenuItemEvent() {
 
 					@Override
 					public void onListItemClick(Object lv, View v, long id) {
 						try {
 							_method.invoke(obj, (ListView) lv, v, id);
 						} catch (Exception e) {
-							Log.e("Leopardus", e.getMessage());
+							Log.e("Leopardus", "Injector("+obj.getClass().getName()+"->"+_method.getName()+")"+String.valueOf(e));
 						}
 					}
 				});
@@ -108,7 +108,8 @@ public class Injector {
 			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
 			final Method _method = method;
 			if (i != null) {
-				int menuId = obj.addNewItem(obj, i.stringId(), i.iconId(), i.ubication());
+				int menuId = obj.addNewItem(obj, i.stringId(), i.iconId(),
+						i.ubication());
 				obj.addNewEvent(menuId, i.ubication(), new MenuItemEvent() {
 
 					@Override

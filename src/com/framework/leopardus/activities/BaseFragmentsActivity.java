@@ -19,12 +19,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
+import com.framework.leopardus.enums.Ubications;
 import com.framework.leopardus.fragments.BaseFragment;
 import com.framework.leopardus.fragments.BaseMenuFragment;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
-import com.framework.leopardus.interfaces.InterfacesHelper;
 import com.framework.leopardus.utils.GenericActionMode;
 import com.framework.leopardus.utils.Injector;
+import com.framework.leopardus.utils.InterfacesHelper;
 import com.framework.leopardus.utils.ProgressDialogHelper;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity;
@@ -33,6 +34,7 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 
 	private ActionMode actionMode;
 	private BaseMenuFragment menuFragment;
+	private BaseMenuFragment menuFragmentRight;
 	private SlidingMenu slidingMenu;
 	private boolean enableMenuOnHome = false;
 	private FragmentManager fragmentManager = getSupportFragmentManager();
@@ -41,6 +43,8 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	private boolean enableProgressFeatures = false;
 	Stack<Fragment> fragments = new Stack<Fragment>();
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
+	private boolean leftMenuEnabled = true;
+	private boolean rightMenuEnabled = false;
 
 	private void setActualFragment(Fragment frgmnt, boolean addToStack) {
 		if (frgmnt == null) {
@@ -121,6 +125,8 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		FragmentTransaction t = this.getSupportFragmentManager()
 				.beginTransaction();
 		menuFragment = new BaseMenuFragment();
+		menuFragmentRight = new BaseMenuFragment();
+		menuFragmentRight.disableAutoExit();
 		t.replace(R.id.menu_frame, menuFragment);
 		t.commit();
 		slidingMenu = getSlidingMenu();
@@ -129,6 +135,7 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		slidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
 		slidingMenu.setFadeDegree(0.35f);
 		slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+		
 		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		// ///////////////////////////////////////////
 		setContentView(R.layout.content_frame);
@@ -136,8 +143,31 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		setActualFragment(firstFragment, false);
 		setSlidingActionBarEnabled(true);
 		// ///////////////////////////////////////////
+
+		enabledMenuVerification();
+		
+		// ///////////////////////////////////////////
 		Injector i = new Injector(this);
 		i.injectMenuItems(this);
+		i.injectViews(this);
+		i.injectMethodsIntoViews(this);
+	}
+
+	private void enabledMenuVerification() {
+		if (leftMenuEnabled && rightMenuEnabled) {
+			slidingMenu.setMode(SlidingMenu.LEFT_RIGHT);
+			slidingMenu.setSecondaryMenu(R.layout.menu_frame_two);
+		} else if (leftMenuEnabled && !rightMenuEnabled) {
+			slidingMenu.setMode(SlidingMenu.LEFT);
+		}else if (!leftMenuEnabled && rightMenuEnabled) {
+			slidingMenu.setMode(SlidingMenu.LEFT_OF);
+			slidingMenu.setSecondaryMenu(R.layout.menu_frame_two);
+		}
+		
+		if (rightMenuEnabled) {
+			getSupportFragmentManager().beginTransaction()
+			.replace(R.id.second_menu_frame, menuFragmentRight).commit();			
+		}
 	}
 
 	/**
@@ -188,12 +218,23 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	}
 
 	/**
-	 * Return the activity menu
+	 * Return the left activity menu
 	 * 
 	 * @return
 	 */
 	public BaseMenuFragment getMenu() {
-		return menuFragment;
+		return getMenu(Ubications.LEFT);
+	}
+
+	/**
+	 * Return the specified activity menu
+	 * 
+	 * @param ubication
+	 * @return
+	 */
+	public BaseMenuFragment getMenu(Ubications ubication) {
+		return ubication.equals(Ubications.LEFT) ? menuFragment
+				: menuFragmentRight;
 	}
 
 	public void close() {
@@ -249,7 +290,18 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	public void disableAutoExit() {
 		getMenu().disableAutoExit();
 	}
-	////////////////////////////////////////////////////////
+
+	public void setLeftMenuEnabled(boolean leftMenuEnabled) {
+		this.leftMenuEnabled = leftMenuEnabled;
+		enabledMenuVerification();
+	}
+
+	public void setRightMenuEnabled(boolean rightMenuEnabled) {
+		this.rightMenuEnabled = rightMenuEnabled;
+		enabledMenuVerification();
+	}
+
+	// //////////////////////////////////////////////////////
 
 	public void startActionMode(
 			Map<ApplicationMenuItem, ActivityMethodInterface> items) {
@@ -282,7 +334,7 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	public boolean _onOptionsItemSelected(MenuItem item) {
 		// This uses the imported MenuItem from ActionBarSherlock
 		// Toast.makeText(this, "Got click: " + item.toString(),

@@ -1,4 +1,10 @@
-package com.framework.leopardus.interfaces;
+package com.framework.leopardus.utils;
+
+import org.apache.http.HttpResponse;
+
+import com.framework.leopardus.interfaces.ActivityMethodInterface;
+import com.framework.leopardus.interfaces.MethodInterface;
+import com.framework.leopardus.interfaces.RESTCallback;
 
 import android.app.Activity;
 import android.view.View;
@@ -35,5 +41,12 @@ public class InterfacesHelper {
 			}
 		};
 	}
-	
+
+	public static RESTCallback getVoidRESTCallback(RESTSimpleTool instance){
+		return new RESTCallback(instance) {			
+			@Override
+			public void onFinish(int status, String section, HttpResponse resp) {
+			}
+		};
+	}
 }
