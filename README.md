@@ -17,7 +17,7 @@ This framework includes:
 Simple Tutorial
 ---------------
 
-The Base activiti classes are BaseFragmentsActivity and BaseDrawerFragmentsActivity, you can Inject views and methods and menu items.
+The Base activity classes are BaseFragmentsActivity and BaseDrawerFragmentsActivity, you can Inject views, methods and menu items.
 
 ```
 
@@ -33,8 +33,48 @@ class MyFragmentActivity extends BaseFragmentsActivity{
     public void myLongClick(View v){
         ...
     }
+    ...
+    
+    // Inject item into Menu and execute specified method. 
+    InjectMenuItem(stringId = R.string.another, iconId = R.drawable.ic_launcher_another)
+  	public void onAnotherItemClick(ListView lv, View v, long id) {
+  	    ...
+  	}
+    
 
 }
 
 ```
 
+The avaliable fragment classes are BaseFragment (usable with BaseFragmentsActivity) and BaseFragmentDrawer (usable with BaseDrawerFragmentsActivity)
+
+```
+public class ListaFragment extends BaseFragment {
+    
+    @InjectView(id=R.id.btntest)
+	  Button b;
+
+	  @InjectView(id=R.id.imageView1)
+	  ImageView imagen;
+	  
+	  
+  	public ListaFragment() {
+  	  // The layout can be specified in the constructor
+  		super(R.layout.activity_lista_fragment);
+  		setFadingActionBarEnabled(true);
+  	}
+
+
+    @InjectMethod(id=R.id.btntest)
+  	public void onBtn1Click(View v){
+  		this.getActivity().runOnUiThread(new Runnable() {
+  			public void run() {
+  				Toast.makeText(getActivity(), "Click", Toast.LENGTH_LONG).show();
+  			}
+  		});
+  	}
+    
+}
+
+
+```
