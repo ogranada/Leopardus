@@ -13,6 +13,9 @@ This framework includes:
 * PullToRefresh
 * Fading Action Bar
 
+TODO:
+* Injectable Model based ListViews
+
 
 Simple Tutorial
 ---------------
