@@ -22,7 +22,7 @@ Simple Tutorial
 
 The Base activity classes are BaseFragmentsActivity and BaseDrawerFragmentsActivity, you can Inject views, methods and menu items.
 
-```
+```java
 
 class MyFragmentActivity extends BaseFragmentsActivity{
   
@@ -51,7 +51,8 @@ class MyFragmentActivity extends BaseFragmentsActivity{
 
 The avaliable fragment classes are BaseFragment (usable with BaseFragmentsActivity) and BaseFragmentDrawer (usable with BaseDrawerFragmentsActivity)
 
-```
+```java
+
 public class ListaFragment extends BaseFragment {
     
     @InjectView(id=R.id.btntest)
