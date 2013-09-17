@@ -89,3 +89,36 @@ public class ListaFragment extends BaseFragment {
 
 
 ```
+
+The PullToRefresh can be used like this:
+
+```java
+
+
+public class PullToRef extends BaseFragment {
+
+	public PullToRef() {
+		super(R.layout.activity_pull_to_ref);
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View v = super.onCreateView(inflater, container, savedInstanceState);
+		View vw = v.findViewById(R.id.lyt_pull);
+		getParentActivity().PullToRefreshInit();
+		getParentActivity().estabilishRereshForView(vw, new OnRefreshListener() {
+
+			@Override
+			public void onRefreshStarted(View view) {
+				System.err.println("Hola...");
+			}
+		});
+		return v;
+	}
+
+}
+
+
+```
+
