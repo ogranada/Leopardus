@@ -1,15 +1,16 @@
 package com.framework.leopardus.activities;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.OnRefreshListener;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.View;
 
@@ -23,6 +24,7 @@ import com.framework.leopardus.enums.Ubications;
 import com.framework.leopardus.fragments.BaseFragment;
 import com.framework.leopardus.fragments.BaseMenuFragment;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
+import com.framework.leopardus.interfaces.injection.InjectActionBarItem;
 import com.framework.leopardus.utils.GenericActionMode;
 import com.framework.leopardus.utils.Injector;
 import com.framework.leopardus.utils.InterfacesHelper;
@@ -30,6 +32,7 @@ import com.framework.leopardus.utils.ProgressDialogHelper;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity;
 
+@SuppressLint("UseSparseArrays")
 public class BaseFragmentsActivity extends SlidingFragmentActivity {
 
 	private ActionMode actionMode;
@@ -45,6 +48,18 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
 	private boolean leftMenuEnabled = true;
 	private boolean rightMenuEnabled = false;
+	private Map<Integer, InjectActionBarItem> abItems = new HashMap<Integer, InjectActionBarItem>();
+	private Map<Integer, Runnable> abMethods = new HashMap<Integer, Runnable>();
+
+	public int addNewActionBarItem(BaseFragmentsActivity obj,
+			InjectActionBarItem i) {
+		abItems.put(abItems.size(), i);
+		return abItems.size() - 1;
+	}
+
+	public void addNewActionBarItem(int menuId, Runnable r) {
+		abMethods.put(menuId, r);
+	}
 
 	private void setActualFragment(Fragment frgmnt, boolean addToStack) {
 		if (frgmnt == null) {
@@ -113,6 +128,8 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Injector i = new Injector(this);
+		i.injectActionBarItems(this);
 		if (enableProgressFeatures) {
 			requestWindowFeature(Window.FEATURE_PROGRESS);
 			requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -130,12 +147,7 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		t.replace(R.id.menu_frame, menuFragment);
 		t.commit();
 		slidingMenu = getSlidingMenu();
-		slidingMenu.setShadowWidthRes(R.dimen.shadow_width);
-		slidingMenu.setShadowDrawable(R.drawable.shadow);
-		slidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
-		slidingMenu.setFadeDegree(0.35f);
-		slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
-		
+
 		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		// ///////////////////////////////////////////
 		setContentView(R.layout.content_frame);
@@ -145,12 +157,20 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		// ///////////////////////////////////////////
 
 		enabledMenuVerification();
-		
+		configMenuShadows();
+
 		// ///////////////////////////////////////////
-		Injector i = new Injector(this);
 		i.injectMenuItems(this);
 		i.injectViews(this);
 		i.injectMethodsIntoViews(this);
+	}
+
+	private void configMenuShadows() {
+		slidingMenu.setShadowWidthRes(R.dimen.shadow_width);
+		slidingMenu.setShadowDrawable(R.drawable.shadow);
+		slidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
+		slidingMenu.setFadeDegree(0.35f);
+		slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
 	}
 
 	private void enabledMenuVerification() {
@@ -159,14 +179,15 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 			slidingMenu.setSecondaryMenu(R.layout.menu_frame_two);
 		} else if (leftMenuEnabled && !rightMenuEnabled) {
 			slidingMenu.setMode(SlidingMenu.LEFT);
-		}else if (!leftMenuEnabled && rightMenuEnabled) {
+		} else if (!leftMenuEnabled && rightMenuEnabled) {
 			slidingMenu.setMode(SlidingMenu.LEFT_OF);
 			slidingMenu.setSecondaryMenu(R.layout.menu_frame_two);
 		}
-		
+
 		if (rightMenuEnabled) {
 			getSupportFragmentManager().beginTransaction()
-			.replace(R.id.second_menu_frame, menuFragmentRight).commit();			
+					.replace(R.id.second_menu_frame, menuFragmentRight)
+					.commit();
 		}
 	}
 
@@ -316,9 +337,17 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// menu.add("Save")
-		// .setIcon(R.drawable.ic_drawer_dark)
-		// .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		for (int key : abItems.keySet()) {
+			InjectActionBarItem i = abItems.get(key);
+			MenuItem mi = menu.add(Menu.NONE, key, i.itemPosition(),
+					i.stringId());
+			mi.setIcon(i.iconId());
+			if (i.ItemAsIcon()) {
+				mi.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+			} else {
+				mi.setShowAsAction(i.showAs());
+			}
+		}
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -329,6 +358,13 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 			if (this.enableMenuOnHome) {
 				toggle();
 				return true;
+			}
+			break;
+		default:
+			try {
+				abMethods.get(item.getItemId()).run();
+			} catch (Exception e) {
+
 			}
 			break;
 		}
@@ -342,14 +378,11 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		return true;
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenu.ContextMenuInfo menuInfo) {
-		// menu.add("One");
-		// menu.add("Two");
-		// menu.add("Three");
-		// menu.add("Four");
-	}
+	/*
+	 * @Override public void onCreateContextMenu(ContextMenu menu, View v,
+	 * ContextMenu.ContextMenuInfo menuInfo) { menu.add("One"); menu.add("Two");
+	 * menu.add("Three"); menu.add("Four"); }
+	 */
 
 	@Override
 	public boolean onContextItemSelected(android.view.MenuItem item) {
@@ -358,7 +391,6 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 		// Toast.LENGTH_SHORT).show();
 		return true;
 	}
-
 	// registerForContextMenu(findViewById(R.id.show_context_menu)); // TODO:
 
 }
