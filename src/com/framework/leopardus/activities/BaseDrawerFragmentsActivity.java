@@ -4,7 +4,6 @@ import java.util.Stack;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.Position;
-import android.content.ClipData.Item;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -24,7 +23,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
 import com.framework.leopardus.adapters.ItemsAdapter;
-import com.framework.leopardus.fragments.BaseFragment;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
 import com.framework.leopardus.interfaces.InjectableActionBarItem;
 import com.framework.leopardus.interfaces.InjectableMenuItems;
@@ -50,13 +48,13 @@ public abstract class BaseDrawerFragmentsActivity extends
 	private int mActivePosition;
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
 	Stack<Fragment> fragments = new Stack<Fragment>();
-	private FragmentManager fragmentManager = getSupportFragmentManager();
 	private static final String STATE_ACTIVE_POSITION = "net.simonvt.menudrawer.samples.LeftDrawerSample.activePosition";
 	private static final String STATE_CURRENT_FRAGMENT = "net.simonvt.menudrawer.samples.FragmentSample";
 
 	private FragmentManager mFragmentManager;
 	private FragmentTransaction mFragmentTransaction;
 	private String mCurrentFragmentTag;
+	private int autoExitId = 8802;
 
 	protected void commitTransactions() {
 		if (mFragmentTransaction != null && !mFragmentTransaction.isEmpty()) {
@@ -110,9 +108,6 @@ public abstract class BaseDrawerFragmentsActivity extends
 		if (inState != null) {
 			mActivePosition = inState.getInt(STATE_ACTIVE_POSITION);
 		}
-
-		mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.Type.OVERLAY,
-				getDrawerPosition(), getDragMode());
 		adapter = new ItemsAdapter(this);
 		Injector i = new Injector(this);
 		i.injectViews(this);
@@ -122,14 +117,13 @@ public abstract class BaseDrawerFragmentsActivity extends
 		// setContentView(R.layout.menu_frame);
 		mList = new ListView(this);
 		establishItemsAdapter();
-		mMenuDrawer.setMenuView(mList);
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setDisplayHomeAsUpEnabled(enableHomeBtn);
 		}
-		mMenuDrawer.setContentView(R.layout.activity_drawer);
-		mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
-		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer);
-		mMenuDrawer.setDrawerIndicatorEnabled(true);
+
+		makeMenuDrawer();
+
 		// ======================================================
 
 		mFragmentManager = getSupportFragmentManager();
@@ -141,6 +135,30 @@ public abstract class BaseDrawerFragmentsActivity extends
 			setActualFragment(getFragment("xxx"), false);
 		}
 
+	}
+
+	public void makeMenuDrawer() {
+		mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.Type.OVERLAY,
+				getDrawerPosition(), getDragMode());
+		mMenuDrawer.setMenuView(mList);
+		mMenuDrawer.setContentView(R.layout.activity_drawer);
+		mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
+		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer);
+		mMenuDrawer.setDrawerIndicatorEnabled(true);
+	}
+
+	/**
+	 * Use dark bars in menu drawer
+	 */
+	public void enableDarkDrawer() {
+		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer_dark);
+	}
+
+	/**
+	 * Use white bars in menu drawer
+	 */
+	public void enableLightDrawer() {
+		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer_light);
 	}
 
 	/**
@@ -176,9 +194,16 @@ public abstract class BaseDrawerFragmentsActivity extends
 				fragments.push(frgmnt);
 			}
 		}
-		attachFragment(mMenuDrawer.getContentContainer().getId(), frgmnt,
-				mCurrentFragmentTag);
-		commitTransactions();
+		int r = 2;
+		if (1 == r) {
+			attachFragment(mMenuDrawer.getContentContainer().getId(), frgmnt,
+					mCurrentFragmentTag);
+			commitTransactions();
+		} else {
+			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+			transaction.replace(mMenuDrawer.getContentContainer().getId(), frgmnt);
+			transaction.commit();
+		}
 		mMenuDrawer.closeMenu();
 	}
 
@@ -246,9 +271,11 @@ public abstract class BaseDrawerFragmentsActivity extends
 			mi.setMenuKey(key);
 			adapter.add(mi);
 		}
-		if (autoExit) {
-			adapter.add(new ApplicationMenuItem(R.string.quit,
-					R.drawable.ico_dark_quit));
+		if (autoExit) {// TODO:
+			ApplicationMenuItem quit = new ApplicationMenuItem(R.string.quit,
+					R.drawable.ico_dark_quit);
+			quit.setMenuKey(this.autoExitId);
+			adapter.add(quit);
 		}
 		mList.setAdapter(adapter);
 		mList.setOnItemClickListener(new OnItemClickListener() {
@@ -261,9 +288,13 @@ public abstract class BaseDrawerFragmentsActivity extends
 				adapter.setActivePosition(position);
 				ApplicationMenuItem item = (ApplicationMenuItem) adapter
 						.getItem(position);
-				MenuItemEvent x = menuItems.get(item.getMenuKey()).second;
-				x.onListItemClick(null, view, position);
-				mMenuDrawer.setActiveView(view, position);
+				if (item.getMenuKey() != autoExitId) {
+					MenuItemEvent x = menuItems.get(item.getMenuKey()).second;
+					x.onListItemClick(null, view, position);
+					mMenuDrawer.setActiveView(view, position);
+				} else {
+					close();
+				}
 			}
 
 		});
