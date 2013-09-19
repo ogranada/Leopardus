@@ -1,123 +1,158 @@
 package com.framework.leopardus.activities;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.OnRefreshListener;
-
-import android.annotation.SuppressLint;
+import net.simonvt.menudrawer.MenuDrawer;
+import net.simonvt.menudrawer.Position;
+import android.content.ClipData.Item;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.ContextMenu;
+import android.util.Pair;
+import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
-import com.framework.leopardus.enums.Ubications;
-import com.framework.leopardus.fragments.BaseFragmentDrawer;
-import com.framework.leopardus.fragments.InitialFragmentDrawer;
+import com.framework.leopardus.adapters.ItemsAdapter;
+import com.framework.leopardus.fragments.BaseFragment;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
+import com.framework.leopardus.interfaces.InjectableActionBarItem;
+import com.framework.leopardus.interfaces.InjectableMenuItems;
 import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.framework.leopardus.interfaces.injection.InjectActionBarItem;
-import com.framework.leopardus.utils.GenericActionMode;
+import com.framework.leopardus.interfaces.injection.InjectMenuItem;
 import com.framework.leopardus.utils.Injector;
-import com.framework.leopardus.utils.ProgressDialogHelper;
+import com.framework.leopardus.utils.InterfacesHelper;
 
-@SuppressLint("UseSparseArrays")
-public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
-
-	private InitialFragmentDrawer instance = null;
-	private ActionMode actionMode;
-	private boolean enableProgressFeatures = false;
-	private ProgressDialogHelper pdHelper = new ProgressDialogHelper();
-	private PullToRefreshAttacher pullToRefreshAttacher = null;
-	private Map<Integer, InjectActionBarItem> abItems = new HashMap<Integer, InjectActionBarItem>();
-	private Map<Integer, Runnable> abMethods = new HashMap<Integer, Runnable>();
-
-	public int addNewActionBarItem(BaseDrawerFragmentsActivity obj,
-			InjectActionBarItem i) {
-		abItems.put(abItems.size(), i);
-		return abItems.size() - 1;
-	}
-
-	public void addNewActionBarItem(int menuId, Runnable r) {
-		abMethods.put(menuId, r);
-	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		Injector i = new Injector(this);
-		i.injectActionBarItems(this);
-		super.onCreate(savedInstanceState);
-		if (enableProgressFeatures) {
-			requestWindowFeature(Window.FEATURE_PROGRESS);
-			requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		}
-		setContentView(R.layout.activity_drawer);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-		if (enableProgressFeatures) {
-			setSupportProgressBarIndeterminateVisibility(false);
-			setSupportProgressBarVisibility(false);
-		}
-		setInitialFragment();
-		i.injectViews(this);
-		i.injectMethodsIntoViews(this);
-		i.injectMenuItems(this);
-	}
-
-	private void setInitialFragment() {
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager
-				.beginTransaction();
-		instance = InitialFragmentDrawer.newInstance();
-		fragmentTransaction.add(R.id.drawer_content, instance).commit();
-	}
-	
-	@Override
-	protected void onPause() {
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager
-				.beginTransaction();
-		instance = InitialFragmentDrawer.newInstance();
-		fragmentTransaction.remove(instance);
-		instance = null;
-		super.onPause();
-	}
-
-	public void addFragment(BaseFragmentDrawer frgmnt) {
-		if (instance != null) {
-			instance.addFragment(R.string.hello_world, frgmnt);
-		}
-	}
-
-	public int addNewItem(BaseDrawerFragmentsActivity obj, int stringId,
-			int iconId) {
-		return addNewItem(obj, stringId, iconId, Ubications.LEFT);
-	}
-
-	public int addNewItem(BaseDrawerFragmentsActivity obj, int stringId,
-			int iconId, Ubications u) {
-		return instance.addMenuItem(stringId, iconId, u);
-	}
-
-	public void addNewEvent(int menuId, Ubications ubication,
-			MenuItemEvent menuItemEvent) {
-		instance.addNewEvent(menuId, ubication, menuItemEvent);
-	}
-
+public abstract class BaseDrawerFragmentsActivity extends
+		SherlockFragmentActivity implements InjectableMenuItems,
+		InjectableActionBarItem {
+	protected MenuDrawer mMenuDrawer;
+	protected ItemsAdapter adapter;
+	private ListView mList;
+	SparseArray<Pair<InjectMenuItem, MenuItemEvent>> menuItems = new SparseArray<Pair<InjectMenuItem, MenuItemEvent>>(
+			0);
+	SparseArray<Pair<InjectActionBarItem, Runnable>> abData = new SparseArray<Pair<InjectActionBarItem, Runnable>>(
+			0);
+	private boolean autoExit = false;
+	private boolean enableHomeBtn = true;
+	@SuppressWarnings("unused")
+	private int mActivePosition;
+	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
 	Stack<Fragment> fragments = new Stack<Fragment>();
-	
-	public void setActualFragment(Fragment frgmnt, boolean addToStack) {		
+	private FragmentManager fragmentManager = getSupportFragmentManager();
+	private static final String STATE_ACTIVE_POSITION = "net.simonvt.menudrawer.samples.LeftDrawerSample.activePosition";
+	private static final String STATE_CURRENT_FRAGMENT = "net.simonvt.menudrawer.samples.FragmentSample";
+
+	private FragmentManager mFragmentManager;
+	private FragmentTransaction mFragmentTransaction;
+	private String mCurrentFragmentTag;
+
+	protected void commitTransactions() {
+		if (mFragmentTransaction != null && !mFragmentTransaction.isEmpty()) {
+			mFragmentTransaction.commit();
+			mFragmentTransaction = null;
+		}
+	}
+
+	protected FragmentTransaction ensureTransaction() {
+		if (mFragmentTransaction == null) {
+			mFragmentTransaction = mFragmentManager.beginTransaction();
+			mFragmentTransaction
+					.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+		}
+
+		return mFragmentTransaction;
+	}
+
+	private Fragment getFragment(String tag) {
+		Fragment f = mFragmentManager.findFragmentByTag(tag);
+
+		if (f == null) {
+			f = new Fragment();
+		}
+		return f;
+	}
+
+	protected void attachFragment(int layout, Fragment f, String tag) {
+		if (f != null) {
+			if (f.isDetached()) {
+				ensureTransaction();
+				mFragmentTransaction.attach(f);
+			} else if (!f.isAdded()) {
+				ensureTransaction();
+				mFragmentTransaction.add(layout, f, tag);
+			}
+		}
+	}
+
+	protected void detachFragment(Fragment f) {
+		if (f != null && !f.isDetached()) {
+			ensureTransaction();
+			mFragmentTransaction.detach(f);
+		}
+	}
+
+	@Override
+	public void onCreate(Bundle inState) {
+		super.onCreate(inState);
+
+		if (inState != null) {
+			mActivePosition = inState.getInt(STATE_ACTIVE_POSITION);
+		}
+
+		mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.Type.OVERLAY,
+				getDrawerPosition(), getDragMode());
+		adapter = new ItemsAdapter(this);
+		Injector i = new Injector(this);
+		i.injectViews(this);
+		i.injectMenuItems(this);
+		i.injectActionBarItems(this);
+		i.injectMethodsIntoViews(this);
+		// setContentView(R.layout.menu_frame);
+		mList = new ListView(this);
+		establishItemsAdapter();
+		mMenuDrawer.setMenuView(mList);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			getActionBar().setDisplayHomeAsUpEnabled(enableHomeBtn);
+		}
+		mMenuDrawer.setContentView(R.layout.activity_drawer);
+		mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
+		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer);
+		mMenuDrawer.setDrawerIndicatorEnabled(true);
+		// ======================================================
+
+		mFragmentManager = getSupportFragmentManager();
+		if (inState != null) {
+			mCurrentFragmentTag = inState.getString(STATE_CURRENT_FRAGMENT);
+		} else {
+			mCurrentFragmentTag = getResources().getString(
+					adapter.getItem(0).textRes);
+			setActualFragment(getFragment("xxx"), false);
+		}
+
+	}
+
+	/**
+	 * Set the actual fragment
+	 * 
+	 * @param frgmnt
+	 */
+	public void setActualFragment(Fragment frgmnt) {
+		setActualFragment(frgmnt, true);
+	}
+
+	private void setActualFragment(Fragment frgmnt, boolean addToStack) {
 		if (frgmnt == null) {
 			return;
 		}
@@ -141,26 +176,47 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 				fragments.push(frgmnt);
 			}
 		}
-		if (instance != null && frgmnt instanceof BaseFragmentDrawer) {
-			instance.addFragment(R.string.hello_world,
-					(BaseFragmentDrawer) frgmnt);
+		attachFragment(mMenuDrawer.getContentContainer().getId(), frgmnt,
+				mCurrentFragmentTag);
+		commitTransactions();
+		mMenuDrawer.closeMenu();
+	}
+
+	public void enableHomeAsButton() {
+		enableHomeBtn = true;
+		try {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				getActionBar().setDisplayHomeAsUpEnabled(enableHomeBtn);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
 	}
 
-	/**
-	 * Set the actual fragment
-	 * 
-	 * @param frgmnt
-	 */
-	public void setActualFragment(Fragment frgmnt) {
-		setActualFragment(frgmnt, true);
+	public void disableHomeAsButton() {
+		enableHomeBtn = false;
+		try {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				getActionBar().setDisplayHomeAsUpEnabled(enableHomeBtn);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+
+	protected int getDragMode() {
+		return MenuDrawer.MENU_DRAG_CONTENT;
+	}
+
+	protected Position getDrawerPosition() {
+		return Position.LEFT;
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
 			if (fragments.size() <= 1) {
-				instance.getOnCloseEvent().Method(this);
+				closeCallback.Method(this);
 				return false;// super.onKeyDown(keyCode, event);
 			} else {
 				fragments.pop();
@@ -171,163 +227,107 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-
 	public void close() {
-		instance.getOnCloseEvent().Method(this);
-	}
-
-	/**
-	 * Init and return the PullToRefreshAttacher
-	 * 
-	 * @return PullToRefreshAttacher instance
-	 */
-	public PullToRefreshAttacher PullToRefreshInit() {
-		if (pullToRefreshAttacher == null) {
-			pullToRefreshAttacher = PullToRefreshAttacher.get(this);
-		}
-		return pullToRefreshAttacher;
-	}
-
-	/**
-	 * Set the refresh listener for the provided view
-	 * 
-	 * @param view
-	 * @param onRefreshListener
-	 */
-	public void estabilishRereshForView(View view,
-			OnRefreshListener onRefreshListener) {
-		if (pullToRefreshAttacher == null) {
-			PullToRefreshInit();
-		}
-		pullToRefreshAttacher.addRefreshableView(view, onRefreshListener);
+		closeCallback.Method(this);
 	}
 
 	public void setOnCloseEvent(ActivityMethodInterface ami) {
-		instance.setOnCloseEvent(ami);
+		closeCallback = ami;
 	}
 
-	public void setLeftMenuEnabled(boolean leftMenuEnabled) {
-		instance.setLeftMenuEnabled(leftMenuEnabled);
-	}
-
-	public void setRightMenuEnabled(boolean rightMenuEnabled) {
-		instance.setRightMenuEnabled(rightMenuEnabled);
-	}
-
-	/**
-	 * Enable home icon on action bar as button
-	 */
-	public void enableHomeAsButton() {
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-	}
-
-	/**
-	 * Enable toogle Menu on Home button click
-	 */
-	public void setEnabledMenuOnHomeButton() {
-		instance.setEnabledMenuOnHomeButton();
-	}
-
-	/**
-	 * Disable toogle Menu on Home button click
-	 */
-	public void setDisabledMenuOnHomeButton() {
-		instance.setDisabledMenuOnHomeButton();
-	}
-
-	/**
-	 * Return if is enabled toogle menu on home
-	 * 
-	 * @return
-	 */
-	public boolean isEnabledMenuOnHomeButton() {
-		return instance.isEnabledMenuOnHomeButton();
-	}
-
-	public void showProgressBar() {
-		if (enableProgressFeatures) {
-			setSupportProgressBarVisibility(true);
+	private void establishItemsAdapter() {
+		int size = menuItems.size();
+		for (int i = 0; i < size; i++) {
+			int key = menuItems.keyAt(i);
+			Pair<InjectMenuItem, MenuItemEvent> pair = menuItems.get(key);
+			InjectMenuItem item = pair.first;
+			ApplicationMenuItem mi = new ApplicationMenuItem(item.stringId(),
+					item.iconId());
+			mi.setMenuKey(key);
+			adapter.add(mi);
 		}
-	}
-
-	public void showIndeterminateProgressBar() {
-		if (enableProgressFeatures) {
-			setSupportProgressBarIndeterminateVisibility(true);
+		if (autoExit) {
+			adapter.add(new ApplicationMenuItem(R.string.quit,
+					R.drawable.ico_dark_quit));
 		}
-	}
+		mList.setAdapter(adapter);
+		mList.setOnItemClickListener(new OnItemClickListener() {
 
-	public ProgressDialogHelper getProgressDialogHelper() {
-		return pdHelper;
-	}
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				mActivePosition = position;
+				mMenuDrawer.setActiveView(view, position);
+				adapter.setActivePosition(position);
+				ApplicationMenuItem item = (ApplicationMenuItem) adapter
+						.getItem(position);
+				MenuItemEvent x = menuItems.get(item.getMenuKey()).second;
+				x.onListItemClick(null, view, position);
+				mMenuDrawer.setActiveView(view, position);
+			}
 
-	public void setEnableProgressFeatures(boolean enableProgressFeatures) {
-		this.enableProgressFeatures = enableProgressFeatures;
-	}
-
-	public void hideProgressBar() {
-		if (enableProgressFeatures) {
-			setSupportProgressBarVisibility(false);
-		}
-	}
-
-	public void hideIndeterminateProgressBar() {
-		if (enableProgressFeatures) {
-			setSupportProgressBarIndeterminateVisibility(false);
-		}
+		});
 	}
 
 	public void enableAutoExit() {
-		instance.enableAutoExit();
+		this.autoExit = true;
 	}
 
 	public void disableAutoExit() {
-		instance.disableAutoExit();
-	}
-	
-	// //////////////////////////////////////////////////////
-
-	public void startActionMode(
-			Map<ApplicationMenuItem, ActivityMethodInterface> items) {
-		super.startActionMode(new GenericActionMode(this, items));
+		this.autoExit = false;
 	}
 
-	public void stopActionMode() {
-		if (actionMode != null) {
-			actionMode.finish();
-		}
-	}
-
-	public void injectActionBarItems(Menu menu) {
-		for (int key : abItems.keySet()) {
-			InjectActionBarItem i = abItems.get(key);
-			MenuItem mi = menu.add(Menu.NONE, key, i.itemPosition(),
-					i.stringId());
-			mi.setIcon(i.iconId());
-			if (i.ItemAsIcon()) {
-				mi.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-			} else {
-				mi.setShowAsAction(i.showAs());
-			}
-		}
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		injectActionBarItems(menu);
-		return super.onCreateOptionsMenu(menu);
+	public boolean isAutoExitEnabled() {
+		return autoExit;
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public int addNewActionBarItem(InjectActionBarItem i) {
+		int id = abData.size() + 1;
+		abData.put(id, new Pair<InjectActionBarItem, Runnable>(i, null));
+		return id;
+	}
+
+	@Override
+	public void addNewActionBarItem(int menuId, Runnable runnable) {
+		InjectActionBarItem first = abData.get(menuId).first;
+		abData.put(menuId, new Pair<InjectActionBarItem, Runnable>(first,
+				runnable));
+	}
+
+	@Override
+	public int addNewItem(InjectMenuItem i) {
+		int id = menuItems.size() + 1;
+		menuItems.put(id, new Pair<InjectMenuItem, MenuItemEvent>(i, null));
+		return id;
+	}
+
+	@Override
+	public void addNewEvent(int menuId, InjectMenuItem i,
+			MenuItemEvent menuItemEvent) {
+		InjectMenuItem first = menuItems.get(menuId).first;
+		menuItems.put(menuId, new Pair<InjectMenuItem, MenuItemEvent>(first,
+				menuItemEvent));
+	}
+
+	private static final String STATE_CONTENT_TEXT = "com.framework.leopardus";
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString(STATE_CONTENT_TEXT, "...");
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(
+			com.actionbarsherlock.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			if (instance.isEnabledMenuOnHomeButton()) {
-				instance.toggleLeftMenu();
-			}
-			break;
+			mMenuDrawer.toggleMenu();
+			return true;
 		default:
 			try {
-				abMethods.get(item.getItemId()).run();
+				abData.get(item.getItemId()).second.run();
 			} catch (Exception e) {
 
 			}
@@ -337,19 +337,32 @@ public class BaseDrawerFragmentsActivity extends SherlockFragmentActivity {
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenu.ContextMenuInfo menuInfo) {
-		// menuonOptionsItemSelectednu.add("Four");
+	public void onBackPressed() {
+		final int drawerState = mMenuDrawer.getDrawerState();
+		if (drawerState == MenuDrawer.STATE_OPEN
+				|| drawerState == MenuDrawer.STATE_OPENING) {
+			mMenuDrawer.closeMenu();
+			return;
+		}
+
+		super.onBackPressed();
 	}
 
-	@Override
-	public boolean onContextItemSelected(android.view.MenuItem item) {
-		// Note how this callback is using the fully-qualified class name
-		// Toast.makeText(this, "Got click: " + item.toString(),
-		// Toast.LENGTH_SHORT).show();
-		return true;
+	public boolean onCreateOptionsMenu(Menu menu) {
+		for (int j = 0; j < abData.size(); j++) {
+			int key = abData.keyAt(j);
+			Pair<InjectActionBarItem, Runnable> it = abData.get(key);
+			InjectActionBarItem i = it.first;
+			MenuItem mi = menu.add(Menu.NONE, key, i.itemPosition(),
+					i.stringId());
+			mi.setIcon(i.iconId());
+			if (i.ItemAsIcon()) {
+				mi.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+			} else {
+				mi.setShowAsAction(i.showAs());
+			}
+		}
+		return super.onCreateOptionsMenu(menu);
 	}
-
-	// registerForContextMenu(findViewById(R.id.show_context_menu)); // TODO:
 
 }

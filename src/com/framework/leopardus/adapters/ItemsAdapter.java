@@ -12,6 +12,8 @@ import com.framework.leopardus.R;
 
 public class ItemsAdapter extends ArrayAdapter<ApplicationMenuItem> {
 
+	private int activePosition = -1;
+
 	public ItemsAdapter(Context context) {
 		super(context, 0);
 	}
@@ -28,8 +30,16 @@ public class ItemsAdapter extends ArrayAdapter<ApplicationMenuItem> {
 		}
 		TextView title = (TextView) convertView.findViewById(R.id.row_title);
 		title.setText(getItem(position).textRes);
-
+		try {
+			convertView.setTag(R.id.mdActiveViewPosition, position);
+		} catch (Exception e) {
+			
+		}
 		return convertView;
+	}
+
+	public void setActivePosition(int position) {
+		this.activePosition = position;
 	}
 
 }

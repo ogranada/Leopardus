@@ -24,7 +24,11 @@ import com.framework.leopardus.enums.Ubications;
 import com.framework.leopardus.fragments.BaseFragment;
 import com.framework.leopardus.fragments.BaseMenuFragment;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
+import com.framework.leopardus.interfaces.InjectableActionBarItem;
+import com.framework.leopardus.interfaces.InjectableMenuItems;
+import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.framework.leopardus.interfaces.injection.InjectActionBarItem;
+import com.framework.leopardus.interfaces.injection.InjectMenuItem;
 import com.framework.leopardus.utils.GenericActionMode;
 import com.framework.leopardus.utils.Injector;
 import com.framework.leopardus.utils.InterfacesHelper;
@@ -33,7 +37,8 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity;
 
 @SuppressLint("UseSparseArrays")
-public class BaseFragmentsActivity extends SlidingFragmentActivity {
+public class BaseFragmentsActivity extends SlidingFragmentActivity implements
+		InjectableMenuItems, InjectableActionBarItem {
 
 	private ActionMode actionMode;
 	private BaseMenuFragment menuFragment;
@@ -51,14 +56,36 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 	private Map<Integer, InjectActionBarItem> abItems = new HashMap<Integer, InjectActionBarItem>();
 	private Map<Integer, Runnable> abMethods = new HashMap<Integer, Runnable>();
 
-	public int addNewActionBarItem(BaseFragmentsActivity obj,
-			InjectActionBarItem i) {
+	@Override
+	public int addNewItem(InjectMenuItem i) {
+		return getMenu(i.ubication())
+				.addNewItem(this, i.stringId(), i.iconId());
+	}
+
+	@Override
+	public void addNewEvent(int menuId, InjectMenuItem i,
+			MenuItemEvent menuItemEvent) {
+		getMenu(i.ubication()).addNewEvent(menuId, menuItemEvent);
+	}
+
+	@Override
+	public int addNewActionBarItem(InjectActionBarItem i) {
 		abItems.put(abItems.size(), i);
 		return abItems.size() - 1;
 	}
 
+	@Override
 	public void addNewActionBarItem(int menuId, Runnable r) {
 		abMethods.put(menuId, r);
+	}
+
+	/**
+	 * Set the actual fragment
+	 * 
+	 * @param frgmnt
+	 */
+	public void setActualFragment(Fragment frgmnt) {
+		setActualFragment(frgmnt, true);
 	}
 
 	private void setActualFragment(Fragment frgmnt, boolean addToStack) {
@@ -189,15 +216,6 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity {
 					.replace(R.id.second_menu_frame, menuFragmentRight)
 					.commit();
 		}
-	}
-
-	/**
-	 * Set the actual fragment
-	 * 
-	 * @param frgmnt
-	 */
-	public void setActualFragment(Fragment frgmnt) {
-		setActualFragment(frgmnt, true);
 	}
 
 	@Override

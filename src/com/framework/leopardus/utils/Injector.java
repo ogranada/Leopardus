@@ -7,11 +7,10 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
 
-import com.framework.leopardus.activities.BaseDrawerFragmentsActivity;
-import com.framework.leopardus.activities.BaseFragmentsActivity;
 import com.framework.leopardus.exceptions.LeopardusException;
+import com.framework.leopardus.interfaces.InjectableActionBarItem;
+import com.framework.leopardus.interfaces.InjectableMenuItems;
 import com.framework.leopardus.interfaces.MenuItemEvent;
 import com.framework.leopardus.interfaces.injection.InjectActionBarItem;
 import com.framework.leopardus.interfaces.injection.InjectMenuItem;
@@ -78,41 +77,16 @@ public class Injector {
 			}
 		}
 	}
-
-	public void injectMenuItems(final BaseFragmentsActivity obj) {
-		Method[] methods = obj.getClass().getMethods();
-		for (Method method : methods) {
-			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
-			final Method _method = method;
-			if (i != null) {
-				int menuId = obj.getMenu(i.ubication()).addNewItem(obj, i.stringId(),
-						i.iconId());
-				obj.getMenu(i.ubication()).addNewEvent(menuId, new MenuItemEvent() {
-
-					@Override
-					public void onListItemClick(Object lv, View v, long id) {
-						try {
-							_method.invoke(obj, (ListView) lv, v, id);
-						} catch (Exception e) {
-							Log.e("Leopardus", "Injector("+obj.getClass().getName()+"->"+_method.getName()+")"+String.valueOf(e));
-						}
-					}
-				});
-			}
-		}
-	}
-
+	
 	@SuppressWarnings("all")
-	public void injectMenuItems(final BaseDrawerFragmentsActivity obj) {
+	public void injectMenuItems(final InjectableMenuItems obj) {
 		Method[] methods = obj.getClass().getMethods();
 		for (Method method : methods) {
 			InjectMenuItem i = method.getAnnotation(InjectMenuItem.class);
 			final Method _method = method;
 			if (i != null) {
-				int menuId = obj.addNewItem(obj, i.stringId(), i.iconId(),
-						i.ubication());
-				obj.addNewEvent(menuId, i.ubication(), new MenuItemEvent() {
-
+				int menuId = obj.addNewItem(i);
+				obj.addNewEvent(menuId, i, new MenuItemEvent() {
 					@Override
 					public void onListItemClick(Object lv, View v, long id) {
 						try {
@@ -126,35 +100,13 @@ public class Injector {
 		}
 	}
 
-	public void injectActionBarItems(final BaseFragmentsActivity obj) {
+	public void injectActionBarItems(final InjectableActionBarItem obj) {
 		Method[] methods = obj.getClass().getMethods();
 		for (Method method : methods) {
 			InjectActionBarItem i = method.getAnnotation(InjectActionBarItem.class);
 			final Method _method = method;
 			if (i != null) {
-				int menuId = obj.addNewActionBarItem(obj, i);
-				obj.addNewActionBarItem(menuId, new Runnable() {
-					
-					@Override
-					public void run() {
-						try {
-							_method.invoke(obj);
-						} catch (Exception e) {
-							Log.e("Leopardus", e.getMessage());
-						}
-					}
-				});
-			}
-		}
-	}
-
-	public void injectActionBarItems(final BaseDrawerFragmentsActivity obj) {
-		Method[] methods = obj.getClass().getMethods();
-		for (Method method : methods) {
-			InjectActionBarItem i = method.getAnnotation(InjectActionBarItem.class);
-			final Method _method = method;
-			if (i != null) {
-				int menuId = obj.addNewActionBarItem(obj, i);
+				int menuId = obj.addNewActionBarItem(i);
 				obj.addNewActionBarItem(menuId, new Runnable() {
 					
 					@Override
