@@ -194,14 +194,18 @@ public abstract class BaseDrawerFragmentsActivity extends
 				fragments.push(frgmnt);
 			}
 		}
-		int r = 2;
-		if (1 == r) {
-			attachFragment(mMenuDrawer.getContentContainer().getId(), frgmnt,
-					mCurrentFragmentTag);
-			commitTransactions();
-		} else {
-			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-			transaction.replace(mMenuDrawer.getContentContainer().getId(), frgmnt);
+		// {
+		// attachFragment(mMenuDrawer.getContentContainer().getId(), frgmnt,
+		// mCurrentFragmentTag);
+		// commitTransactions();
+		// }
+		{
+			FragmentTransaction transaction = getSupportFragmentManager()
+					.beginTransaction();
+//			transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+			transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+			transaction.replace(mMenuDrawer.getContentContainer().getId(),
+					frgmnt);
 			transaction.commit();
 		}
 		mMenuDrawer.closeMenu();
