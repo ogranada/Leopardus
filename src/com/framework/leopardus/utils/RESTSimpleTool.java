@@ -14,6 +14,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,11 +30,12 @@ import com.framework.leopardus.utils.storage.RESTInternalStorage;
 public class RESTSimpleTool {
 
 	private String user;
-	private String passwd;
 	private String host;
+	private String passwd;
 	private HttpClient httpClient;
+ 	private boolean logged = false;
 	private boolean requirelogin = false;
-	private boolean logged = false;
+	HttpContext localContext = new BasicHttpContext();
 	private static Map<String, RESTSimpleTool> instances = new HashMap<String, RESTSimpleTool>();
 	private static RESTInternalStorage rest_is;
 	
@@ -92,7 +95,15 @@ public class RESTSimpleTool {
 			}
 			instances.put(host, rst);
 		}
-		return instances.get(host);
+		RESTSimpleTool instance = instances.get(host);
+		instance.request(RESTHeaders.GET, "", new RESTCallback(instance) {
+			
+			@Override
+			public void onFinish(int status, String section, HttpResponse resp) {
+				this.getRESTSimpleToolInstance().requirelogin = false;
+			}
+		});
+		return instance;
 	}
 
 	public String requestFromCache(String url) {
@@ -148,7 +159,7 @@ public class RESTSimpleTool {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(get);
+			resp = httpClient.execute(get,localContext);
 			if (callback != null) {
 				// TODO:
 				callback.onFinish(resp.getStatusLine().getStatusCode(),
@@ -196,7 +207,7 @@ public class RESTSimpleTool {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(post);
+			resp = httpClient.execute(post,localContext);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
 				// store(host+apiSection, resp.getStatusLine().getStatusCode(),
@@ -247,7 +258,7 @@ public class RESTSimpleTool {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(put);
+			resp = httpClient.execute(put,localContext);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
 				// store(host+apiSection, resp.getStatusLine().getStatusCode(),
@@ -275,7 +286,7 @@ public class RESTSimpleTool {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(del);
+			resp = httpClient.execute(del,localContext);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
 				// store(host+apiSection, resp.getStatusLine().getStatusCode(),
