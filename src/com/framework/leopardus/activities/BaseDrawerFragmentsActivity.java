@@ -130,9 +130,11 @@ public abstract class BaseDrawerFragmentsActivity extends
 		if (inState != null) {
 			mCurrentFragmentTag = inState.getString(STATE_CURRENT_FRAGMENT);
 		} else {
-			mCurrentFragmentTag = getResources().getString(
-					adapter.getItem(0).textRes);
-			setActualFragment(getFragment("xxx"), false);
+			if (adapter.getCount() > 0) {
+				mCurrentFragmentTag = getResources().getString(
+						adapter.getItem(0).textRes);
+				setActualFragment(getFragment("xxx"), false);
+			}
 		}
 
 	}
@@ -142,7 +144,8 @@ public abstract class BaseDrawerFragmentsActivity extends
 				getDrawerPosition(), getDragMode());
 		mMenuDrawer.setMenuView(mList);
 		mMenuDrawer.setContentView(R.layout.activity_drawer);
-		mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
+		// TODO: 
+//		mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
 		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer);
 		mMenuDrawer.setDrawerIndicatorEnabled(true);
 	}
@@ -170,7 +173,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 		setActualFragment(frgmnt, true);
 	}
 
-	private void setActualFragment(Fragment frgmnt, boolean addToStack) {
+	public void setActualFragment(Fragment frgmnt, boolean addToStack) {
 		if (frgmnt == null) {
 			return;
 		}
@@ -202,8 +205,10 @@ public abstract class BaseDrawerFragmentsActivity extends
 		{
 			FragmentTransaction transaction = getSupportFragmentManager()
 					.beginTransaction();
-//			transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-			transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+			// transaction.setCustomAnimations(android.R.anim.slide_in_left,
+			// android.R.anim.slide_out_right);
+			transaction.setCustomAnimations(android.R.anim.slide_in_left,
+					android.R.anim.slide_out_right);
 			transaction.replace(mMenuDrawer.getContentContainer().getId(),
 					frgmnt);
 			transaction.commit();
