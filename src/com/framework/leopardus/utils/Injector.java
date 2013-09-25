@@ -3,6 +3,7 @@ package com.framework.leopardus.utils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
@@ -63,7 +64,12 @@ public class Injector {
 				} catch (Exception e) {
 					ew = new EventWrapper();
 				}
-				View v = view.findViewById(i.id());
+				View v = null;
+				try {
+					v = view.findViewById(i.id());
+				} catch (Exception w) {
+					v = ((Activity) context).findViewById(i.id());
+				}
 				if (v != null) {
 					try {
 						String mname = i.method().name();
@@ -77,7 +83,7 @@ public class Injector {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("all")
 	public void injectMenuItems(final InjectableMenuItems obj) {
 		Method[] methods = obj.getClass().getMethods();
@@ -103,12 +109,13 @@ public class Injector {
 	public void injectActionBarItems(final InjectableActionBarItem obj) {
 		Method[] methods = obj.getClass().getMethods();
 		for (Method method : methods) {
-			InjectActionBarItem i = method.getAnnotation(InjectActionBarItem.class);
+			InjectActionBarItem i = method
+					.getAnnotation(InjectActionBarItem.class);
 			final Method _method = method;
 			if (i != null) {
 				int menuId = obj.addNewActionBarItem(i);
 				obj.addNewActionBarItem(menuId, new Runnable() {
-					
+
 					@Override
 					public void run() {
 						try {

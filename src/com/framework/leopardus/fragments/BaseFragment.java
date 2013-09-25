@@ -97,6 +97,7 @@ public class BaseFragment extends SherlockFragment {
 			}
 		} else {
 			v = inflater.inflate(layout, container, false);
+//			v = super.onCreateView(inflater, container, savedInstanceState);			
 		}
 		activity = ((Activity) v.getContext());
 		iface.Method(v);

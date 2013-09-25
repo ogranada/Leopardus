@@ -9,8 +9,19 @@ import com.framework.leopardus.enums.Ubications;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+/**
+ * thris anottation need a method with the next params:
+ * <ul>
+ * <li>ListView lv</li>
+ * <li>View v</li>
+ * <li>long id</li>
+ * </ul>
+ * @author ogranada
+ *
+ */
 public @interface InjectMenuItem {
 	int stringId();
 	int iconId() default -1;
+	int position() default 0;
 	Ubications ubication() default Ubications.LEFT;
 }

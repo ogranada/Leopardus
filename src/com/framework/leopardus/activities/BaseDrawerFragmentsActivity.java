@@ -1,9 +1,17 @@
 package com.framework.leopardus.activities;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.Position;
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,6 +31,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
 import com.framework.leopardus.adapters.ItemsAdapter;
+import com.framework.leopardus.enums.Ubications;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
 import com.framework.leopardus.interfaces.InjectableActionBarItem;
 import com.framework.leopardus.interfaces.InjectableMenuItems;
@@ -55,6 +64,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 	private FragmentTransaction mFragmentTransaction;
 	private String mCurrentFragmentTag;
 	private int autoExitId = 8802;
+	private int res_drawer = R.drawable.ic_drawer;
 
 	protected void commitTransactions() {
 		if (mFragmentTransaction != null && !mFragmentTransaction.isEmpty()) {
@@ -144,9 +154,9 @@ public abstract class BaseDrawerFragmentsActivity extends
 				getDrawerPosition(), getDragMode());
 		mMenuDrawer.setMenuView(mList);
 		mMenuDrawer.setContentView(R.layout.activity_drawer);
-		// TODO: 
-//		mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
-		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer);
+		// TODO:
+		// mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
+		mMenuDrawer.setSlideDrawable(this.res_drawer);
 		mMenuDrawer.setDrawerIndicatorEnabled(true);
 	}
 
@@ -154,14 +164,24 @@ public abstract class BaseDrawerFragmentsActivity extends
 	 * Use dark bars in menu drawer
 	 */
 	public void enableDarkDrawer() {
-		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer_dark);
+		this.res_drawer = R.drawable.ic_drawer_dark;
+		changeDrawer();
 	}
 
 	/**
 	 * Use white bars in menu drawer
 	 */
 	public void enableLightDrawer() {
-		mMenuDrawer.setSlideDrawable(R.drawable.ic_drawer_light);
+		this.res_drawer = R.drawable.ic_drawer_light;
+		changeDrawer();
+	}
+
+	private void changeDrawer() {
+		try {
+			mMenuDrawer.setSlideDrawable(this.res_drawer);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 
 	/**
@@ -269,15 +289,36 @@ public abstract class BaseDrawerFragmentsActivity extends
 		closeCallback = ami;
 	}
 
-	private void establishItemsAdapter() {
+	class InjectMenuItemComparator implements Comparator<InjectMenuItem>{
+		 
+	    @Override
+	    public int compare(InjectMenuItem o1, InjectMenuItem o2) {
+	    	if(o1.position()<o2.position()){
+	    		return -1;
+	    	} else if(o1.position()>o2.position()){
+	    		return 1;
+	    	}
+	        return 0;
+	    }
+	} 
+	
+	@SuppressLint("UseSparseArrays")
+	protected void establishItemsAdapter() {
+		List<InjectMenuItem> localMenuItems = new ArrayList<InjectMenuItem>(0);
+		Map<InjectMenuItem, Integer> keys = new HashMap<InjectMenuItem, Integer>();
 		int size = menuItems.size();
-		for (int i = 0; i < size; i++) {
+		for (int i=0;i<size;i++) {
 			int key = menuItems.keyAt(i);
-			Pair<InjectMenuItem, MenuItemEvent> pair = menuItems.get(key);
-			InjectMenuItem item = pair.first;
+			keys.put(menuItems.get(key).first, key);
+			localMenuItems.add(menuItems.get(key).first);
+		}
+		Collections.sort(localMenuItems, new InjectMenuItemComparator());
+		adapter.clear();
+		for (int i=0;i<size;i++) {
+			InjectMenuItem item = localMenuItems.get(i);
 			ApplicationMenuItem mi = new ApplicationMenuItem(item.stringId(),
 					item.iconId());
-			mi.setMenuKey(key);
+			mi.setMenuKey(keys.get(item));
 			adapter.add(mi);
 		}
 		if (autoExit) {// TODO:
@@ -298,9 +339,13 @@ public abstract class BaseDrawerFragmentsActivity extends
 				ApplicationMenuItem item = (ApplicationMenuItem) adapter
 						.getItem(position);
 				if (item.getMenuKey() != autoExitId) {
-					MenuItemEvent x = menuItems.get(item.getMenuKey()).second;
-					x.onListItemClick(null, view, position);
-					mMenuDrawer.setActiveView(view, position);
+					Pair<InjectMenuItem, MenuItemEvent> m_item = menuItems
+							.get(item.getMenuKey());
+					if (m_item != null) {
+						MenuItemEvent x = m_item.second;
+						x.onListItemClick(null, view, position);
+						mMenuDrawer.setActiveView(view, position);
+					}
 				} else {
 					close();
 				}
@@ -342,9 +387,49 @@ public abstract class BaseDrawerFragmentsActivity extends
 		return id;
 	}
 
+	public int addNewItem(final int stringId, final int position, final int icon) {
+		InjectMenuItem i = new InjectMenuItem() {
+
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				// TODO Auto-generated method stub
+				return InjectMenuItem.class;
+			}
+
+			@Override
+			public Ubications ubication() {
+				return null;
+			}
+
+			@Override
+			public int stringId() {
+				return stringId;
+			}
+
+			@Override
+			public int position() {
+				return position;
+			}
+
+			@Override
+			public int iconId() {
+				return icon;
+			}
+		};
+		int id = menuItems.size() + 1;
+		menuItems.put(id, new Pair<InjectMenuItem, MenuItemEvent>(i, null));
+		return id;
+	}
+
 	@Override
 	public void addNewEvent(int menuId, InjectMenuItem i,
 			MenuItemEvent menuItemEvent) {
+		InjectMenuItem first = menuItems.get(menuId).first;
+		menuItems.put(menuId, new Pair<InjectMenuItem, MenuItemEvent>(first,
+				menuItemEvent));
+	}
+
+	public void addNewEvent(int menuId, MenuItemEvent menuItemEvent) {
 		InjectMenuItem first = menuItems.get(menuId).first;
 		menuItems.put(menuId, new Pair<InjectMenuItem, MenuItemEvent>(first,
 				menuItemEvent));
