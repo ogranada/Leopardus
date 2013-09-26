@@ -3,7 +3,7 @@ package com.framework.leopardus.utils;
 import android.content.Context;
 import android.widget.Toast;
 
-public class ToastTool {
+public class ToastHelper {
 
 	public static void shortToast(Context ctx, String msj) {
 		Toast.makeText(ctx, msj, Toast.LENGTH_SHORT).show();

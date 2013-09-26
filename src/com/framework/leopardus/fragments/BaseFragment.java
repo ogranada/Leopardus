@@ -12,7 +12,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.framework.leopardus.R;
 import com.framework.leopardus.activities.BaseFragmentsActivity;
 import com.framework.leopardus.interfaces.MethodInterface;
-import com.framework.leopardus.utils.ImageLoaderTool;
+import com.framework.leopardus.utils.ImageLoaderHelper;
 import com.framework.leopardus.utils.Injector;
 import com.framework.leopardus.utils.InterfacesHelper;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
@@ -89,7 +89,7 @@ public class BaseFragment extends SherlockFragment {
 				headerImg.setImageResource(fadingHeaderImage);
 			} else {
 				try {
-					ImageLoaderTool.getInstance(v.getContext()).display(
+					ImageLoaderHelper.getInstance(v.getContext()).display(
 							headerImagePath, headerImg);
 				} catch (Exception e) {
 					headerImg.setImageResource(R.drawable.tigrillo);
@@ -135,7 +135,7 @@ public class BaseFragment extends SherlockFragment {
 		if (activity != null) {
 			Context ctx = activity.getBaseContext();
 			if (ctx != null && headerImg != null) {
-				ImageLoaderTool.getInstance(ctx).display(headerImagePath,
+				ImageLoaderHelper.getInstance(ctx).display(headerImagePath,
 						headerImg);
 			}
 		}

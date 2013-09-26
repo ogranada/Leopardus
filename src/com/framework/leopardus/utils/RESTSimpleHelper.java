@@ -27,7 +27,7 @@ import com.framework.leopardus.enums.RESTHeaders;
 import com.framework.leopardus.interfaces.RESTCallback;
 import com.framework.leopardus.utils.storage.RESTInternalStorage;
 
-public class RESTSimpleTool {
+public class RESTSimpleHelper {
 
 	private String user;
 	private String host;
@@ -36,12 +36,12 @@ public class RESTSimpleTool {
  	private boolean logged = false;
 	private boolean requirelogin = false;
 	HttpContext localContext = new BasicHttpContext();
-	private static Map<String, RESTSimpleTool> instances = new HashMap<String, RESTSimpleTool>();
+	private static Map<String, RESTSimpleHelper> instances = new HashMap<String, RESTSimpleHelper>();
 	private static RESTInternalStorage rest_is;
 	
 	public static boolean INFO = false;
 
-	private RESTSimpleTool(String host) {
+	private RESTSimpleHelper(String host) {
 		this(host, null, null);
 	}
 
@@ -70,7 +70,7 @@ public class RESTSimpleTool {
 		}
 	}
 
-	private RESTSimpleTool(String host, String user, String passwd) {
+	private RESTSimpleHelper(String host, String user, String passwd) {
 		httpClient = new DefaultHttpClient();
 		this.host = host;
 		requirelogin = user != null && passwd != null;
@@ -78,7 +78,7 @@ public class RESTSimpleTool {
 		this.passwd = passwd;
 	}
 
-	public static RESTSimpleTool getInstance(String host, String user,
+	public static RESTSimpleHelper getInstance(String host, String user,
 			String passwd) {
 		if (!host.endsWith("/")) {
 			host += "/";
@@ -87,15 +87,15 @@ public class RESTSimpleTool {
 			host = "http://" + host;
 		}
 		if (!instances.containsKey(host)) {
-			RESTSimpleTool rst = null;
+			RESTSimpleHelper rst = null;
 			if (user != null && passwd != null) {
-				rst = new RESTSimpleTool(host, user, passwd);
+				rst = new RESTSimpleHelper(host, user, passwd);
 			} else {
-				rst = new RESTSimpleTool(host);
+				rst = new RESTSimpleHelper(host);
 			}
 			instances.put(host, rst);
 		}
-		RESTSimpleTool instance = instances.get(host);
+		RESTSimpleHelper instance = instances.get(host);
 		instance.request(RESTHeaders.GET, "", new RESTCallback(instance) {
 			
 			@Override

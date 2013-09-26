@@ -1,4 +1,4 @@
-package com.framework.leopardus.utils;
+package com.framework.leopardus.utils.wrappers;
 
 import java.util.HashMap;
 import java.util.Map;

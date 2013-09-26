@@ -48,7 +48,7 @@ public class LocationHelper implements LocationListener {
 	public Location getLocation() {
 		try {
 			locationManager = (LocationManager) mContext
-					.getSystemService(mContext.LOCATION_SERVICE);
+					.getSystemService(Context.LOCATION_SERVICE);
 
 			// getting GPS status
 			isGPSEnabled = locationManager

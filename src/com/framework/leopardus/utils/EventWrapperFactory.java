@@ -1,5 +1,7 @@
 package com.framework.leopardus.utils;
 
+import com.framework.leopardus.utils.wrappers.EventWrapper;
+
 public class EventWrapperFactory {
 
 	public static Class<EventWrapper> wraperClass = EventWrapper.class;

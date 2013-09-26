@@ -17,6 +17,7 @@ import com.framework.leopardus.interfaces.injection.InjectActionBarItem;
 import com.framework.leopardus.interfaces.injection.InjectMenuItem;
 import com.framework.leopardus.interfaces.injection.InjectMethod;
 import com.framework.leopardus.interfaces.injection.InjectView;
+import com.framework.leopardus.utils.wrappers.EventWrapper;
 
 public class Injector {
 

@@ -42,7 +42,7 @@ public class InterfacesHelper {
 		};
 	}
 
-	public static RESTCallback getVoidRESTCallback(RESTSimpleTool instance){
+	public static RESTCallback getVoidRESTCallback(RESTSimpleHelper instance){
 		return new RESTCallback(instance) {			
 			@Override
 			public void onFinish(int status, String section, HttpResponse resp) {

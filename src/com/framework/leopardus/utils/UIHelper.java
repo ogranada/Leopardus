@@ -7,7 +7,7 @@ import android.content.DialogInterface;
 
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
 
-public class UI {
+public class UIHelper {
 	public static void dialogYesNo(final Activity c, final String message,
 			final ActivityMethodInterface onYes,
 			final ActivityMethodInterface onNo) {

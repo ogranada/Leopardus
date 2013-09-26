@@ -2,7 +2,7 @@ package com.framework.leopardus.utils.storage;
 
 import java.io.File;
 
-import com.framework.leopardus.utils.RESTSimpleTool;
+import com.framework.leopardus.utils.RESTSimpleHelper;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -70,7 +70,7 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 		// Inserting Row
 		db.insert(TABLE_CONTENTS, null, values);
 		db.close(); // Closing database connection
-		if (RESTSimpleTool.INFO)
+		if (RESTSimpleHelper.INFO)
 			Log.i("Leopardus", "Content is saved succefully");
 	}
 
@@ -119,7 +119,7 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 				return -1;
 			}
 		} catch (Exception e) {
-			if (RESTSimpleTool.INFO)
+			if (RESTSimpleHelper.INFO)
 				Log.e("leopardus",
 						"RESTInternalStorageError(getUrlId): " + e.getMessage());
 			return -1;
@@ -137,7 +137,7 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 				// updating row
 				int stts = db.update(TABLE_CONTENTS, values, KEY_ID + " = ?",
 						new String[] { String.valueOf(id) });
-				if (RESTSimpleTool.INFO)
+				if (RESTSimpleHelper.INFO)
 					Log.i("Leopardus", "URL " + url + " Updated succefully");
 				return stts;
 			} else

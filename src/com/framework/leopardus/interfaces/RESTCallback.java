@@ -5,13 +5,13 @@ import java.io.IOException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 
-import com.framework.leopardus.utils.RESTSimpleTool;
+import com.framework.leopardus.utils.RESTSimpleHelper;
 
 import android.util.Log;
 
 public abstract class RESTCallback {
 
-	private RESTSimpleTool RESTSimpleToolInstance;
+	private RESTSimpleHelper RESTSimpleToolInstance;
 	private String requestUrl = "";
 
 	public String getRequestUrl() {
@@ -26,11 +26,11 @@ public abstract class RESTCallback {
 		RESTSimpleToolInstance = null;
 	}
 
-	public RESTCallback(RESTSimpleTool rst) {
+	public RESTCallback(RESTSimpleHelper rst) {
 		RESTSimpleToolInstance = rst;
 	}
 
-	public RESTSimpleTool getRESTSimpleToolInstance() {
+	public RESTSimpleHelper getRESTSimpleToolInstance() {
 		return RESTSimpleToolInstance;
 	}
 

@@ -11,20 +11,20 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.utils.StorageUtils;
 
-public class ImageLoaderTool {
+public class ImageLoaderHelper {
 
 	private ImageLoaderConfiguration config;
-	private static ImageLoaderTool loader;
+	private static ImageLoaderHelper loader;
 	private ImageLoader ildr;
 
-	public static ImageLoaderTool getInstance(Context ctx) {
+	public static ImageLoaderHelper getInstance(Context ctx) {
 		if (loader == null) {
-			loader = new ImageLoaderTool(ctx);
+			loader = new ImageLoaderHelper(ctx);
 		}
 		return loader;
 	}
 
-	public ImageLoaderTool(Context ctx) {
+	public ImageLoaderHelper(Context ctx) {
 		File cacheDir = StorageUtils.getCacheDirectory(ctx);
 		ildr = ImageLoader.getInstance();
 		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()

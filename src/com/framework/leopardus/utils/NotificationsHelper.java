@@ -9,13 +9,13 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
-public class Notifications {
+@SuppressWarnings("rawtypes")
+public class NotificationsHelper {
 
 	public static int getId() {
 		return (new Random()).nextInt();
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static int sendNotification(Context ctx, int smallIcon,
 			String titile, String content, Class clazz) {
 		int id = getId();
@@ -23,13 +23,11 @@ public class Notifications {
 		return id;
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static void updateNotification(Context ctx, int id, int smallIcon,
 			String titile, String content, Class clazz) {
 		updateNotification(ctx, id, smallIcon, titile, content, clazz, true, null);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public static int sendNotification(Context ctx, int smallIcon,
 			String titile, String content, Class clazz, boolean autoCancel,
 			String[] multiLines) {
@@ -38,7 +36,6 @@ public class Notifications {
 		return id;
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static void updateNotification(Context ctx, int id, int smallIcon,
 			String titile, String content, Class clazz, boolean autoCancel,
 			String[] multiLines) {
