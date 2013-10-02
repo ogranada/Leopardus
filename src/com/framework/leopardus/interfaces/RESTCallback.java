@@ -11,7 +11,7 @@ import android.util.Log;
 
 public abstract class RESTCallback {
 
-	private RESTSimpleHelper RESTSimpleToolInstance;
+	private RESTSimpleHelper RestSimpleHelperInstance;
 	private String requestUrl = "";
 
 	public String getRequestUrl() {
@@ -23,15 +23,15 @@ public abstract class RESTCallback {
 	}
 
 	public RESTCallback() {
-		RESTSimpleToolInstance = null;
+		RestSimpleHelperInstance = null;
 	}
 
 	public RESTCallback(RESTSimpleHelper rst) {
-		RESTSimpleToolInstance = rst;
+		RestSimpleHelperInstance = rst;
 	}
 
-	public RESTSimpleHelper getRESTSimpleToolInstance() {
-		return RESTSimpleToolInstance;
+	public RESTSimpleHelper getRESTSimpleHelperInstance() {
+		return RestSimpleHelperInstance;
 	}
 
 	/**
@@ -43,13 +43,18 @@ public abstract class RESTCallback {
 
 	public void onClientProtocolException(ClientProtocolException cpe) {
 		Log.e("Leopardus",
-				"RestSimpleTool: Error with client protocol: "
+				"RestSimpleHelper: Error with client protocol: "
 						+ cpe.getMessage());
 	}
 
 	public void onIOException(IOException ioe) {
 		Log.e("Leopardus",
-				"RestSimpleTool: IOException error: " + ioe.getMessage());
+				"RestSimpleHelper: IOException error: " + ioe.getMessage());
+	}
+
+	public void onException(Exception e) {
+		Log.e("Leopardus",
+				"RestSimpleHelper: Exception error: " + e.getMessage());
 	}
 
 }

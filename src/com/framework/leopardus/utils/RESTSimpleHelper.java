@@ -2,7 +2,9 @@ package com.framework.leopardus.utils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpResponse;
@@ -16,6 +18,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,7 +28,9 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.framework.leopardus.enums.RESTHeaders;
+import com.framework.leopardus.interfaces.ModelCallback;
 import com.framework.leopardus.interfaces.RESTCallback;
+import com.framework.leopardus.models.Model;
 import com.framework.leopardus.utils.storage.RESTInternalStorage;
 
 public class RESTSimpleHelper {
@@ -33,12 +39,12 @@ public class RESTSimpleHelper {
 	private String host;
 	private String passwd;
 	private HttpClient httpClient;
- 	private boolean logged = false;
+	private boolean logged = false;
 	private boolean requirelogin = false;
 	HttpContext localContext = new BasicHttpContext();
 	private static Map<String, RESTSimpleHelper> instances = new HashMap<String, RESTSimpleHelper>();
 	private static RESTInternalStorage rest_is;
-	
+
 	public static boolean INFO = false;
 
 	private RESTSimpleHelper(String host) {
@@ -78,6 +84,10 @@ public class RESTSimpleHelper {
 		this.passwd = passwd;
 	}
 
+	public static RESTSimpleHelper getInstance(String host) {
+		return getInstance(host, null, null);
+	}
+
 	public static RESTSimpleHelper getInstance(String host, String user,
 			String passwd) {
 		if (!host.endsWith("/")) {
@@ -97,10 +107,10 @@ public class RESTSimpleHelper {
 		}
 		RESTSimpleHelper instance = instances.get(host);
 		instance.request(RESTHeaders.GET, "", new RESTCallback(instance) {
-			
+
 			@Override
 			public void onFinish(int status, String section, HttpResponse resp) {
-				this.getRESTSimpleToolInstance().requirelogin = false;
+				// this.getRESTSimpleHelperInstance().requirelogin = false;
 			}
 		});
 		return instance;
@@ -159,7 +169,8 @@ public class RESTSimpleHelper {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(get,localContext);
+			// resp = httpClient.execute(get, localContext);
+			resp = httpClient.execute(get);
 			if (callback != null) {
 				// TODO:
 				callback.onFinish(resp.getStatusLine().getStatusCode(),
@@ -172,6 +183,10 @@ public class RESTSimpleHelper {
 		} catch (IOException e) {
 			if (callback != null) {
 				callback.onIOException(e);
+			}
+		} catch (Exception e) {
+			if (callback != null) {
+				callback.onException(e);
 			}
 		}
 	}
@@ -207,7 +222,8 @@ public class RESTSimpleHelper {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(post,localContext);
+			// resp = httpClient.execute(post, localContext);
+			resp = httpClient.execute(post);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
 				// store(host+apiSection, resp.getStatusLine().getStatusCode(),
@@ -222,6 +238,10 @@ public class RESTSimpleHelper {
 		} catch (IOException e) {
 			if (callback != null) {
 				callback.onIOException(e);
+			}
+		} catch (Exception e) {
+			if (callback != null) {
+				callback.onException(e);
 			}
 		}
 	}
@@ -258,7 +278,8 @@ public class RESTSimpleHelper {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(put,localContext);
+			// resp = httpClient.execute(put, localContext);
+			resp = httpClient.execute(put);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
 				// store(host+apiSection, resp.getStatusLine().getStatusCode(),
@@ -273,6 +294,10 @@ public class RESTSimpleHelper {
 		} catch (IOException e) {
 			if (callback != null) {
 				callback.onIOException(e);
+			}
+		} catch (Exception e) {
+			if (callback != null) {
+				callback.onException(e);
 			}
 		}
 	}
@@ -286,7 +311,8 @@ public class RESTSimpleHelper {
 		}
 		try {
 			HttpResponse resp;
-			resp = httpClient.execute(del,localContext);
+			// resp = httpClient.execute(del, localContext);
+			resp = httpClient.execute(del);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
 				// store(host+apiSection, resp.getStatusLine().getStatusCode(),
@@ -302,6 +328,10 @@ public class RESTSimpleHelper {
 			if (callback != null) {
 				callback.onIOException(e);
 			}
+		} catch (Exception e) {
+			if (callback != null) {
+				callback.onException(e);
+			}
 		}
 	}
 
@@ -313,6 +343,111 @@ public class RESTSimpleHelper {
 		return "Basic "
 				+ Base64.encodeToString((user + ":" + passwd).getBytes(),
 						Base64.NO_WRAP);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void getModelFomRequest(String url, final ModelCallback callback) {
+		this.request(RESTHeaders.GET, url, new RESTCallback(this) {
+			@Override
+			public void onFinish(int status, String section, HttpResponse resp) {
+				if (status >= 200 && status < 300) {
+					try {
+						RESTSimpleHelper i = getRESTSimpleHelperInstance();
+						String respStr = EntityUtils.toString(resp.getEntity());
+						i.store(getRequestUrl(), status, respStr);
+						responseToModel(respStr);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			private void responseToModel(String respStr) {
+				ObjectMapper mapper = new ObjectMapper();
+				try {
+					try {
+						HashMap<String, Object> json = (HashMap<String, Object>) mapper
+								.readValue(respStr, HashMap.class);
+						Model m = new Model();
+						// updateInternalReferences(json);
+						m.updateData(json);
+						callback.onModelLoaded(m);
+						callback.onFinish();
+					} catch (org.codehaus.jackson.map.JsonMappingException e) {
+						ArrayList<HashMap<String, Object>> jsonArray = (ArrayList<HashMap<String, Object>>) mapper
+								.readValue(respStr, ArrayList.class);
+						for (HashMap<String, Object> json : jsonArray) {
+							Model m = new Model();
+							// updateInternalReferences(json);
+							m.updateData(json);
+							callback.onModelLoaded(m);
+						}
+						callback.onFinish();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			@SuppressWarnings("unused")
+			private void updateInternalReferences(final Map<String, Object> json) {
+				for (String _key : json.keySet()) {
+					final String Key = _key;
+					// *
+					if (json.get(Key) instanceof String) {
+						String url = String.valueOf(json.get(Key));
+						if (url.startsWith("http") && url.contains("api/")) {
+							url = url.split("api/")[1];
+							getModelFomRequest(url, new ModelCallback() {
+
+								@Override
+								public void onModelLoaded(Model m) {
+									json.put(Key, m);
+								}
+							});
+						}
+					} else
+					// */
+					if (json.get(Key) instanceof ArrayList) {
+						List<String> slist = (List<String>) json.get(Key);
+						final List<Object> nlist = new ArrayList<Object>();
+						for (String url : slist) {
+							if (url.startsWith("http") && url.contains("api/")) {
+								url = url.split("api/")[1];
+								final ArrayList<Object> arr = new ArrayList<Object>();
+								json.put(Key, arr);
+								getModelFomRequest(url, new ModelCallback() {
+
+									@Override
+									public void onModelLoaded(Model m) {
+										nlist.add(m);
+									}
+								});
+							}
+						}
+						json.put(Key, nlist);
+					}
+
+				}
+			}
+
+			@Override
+			public void onClientProtocolException(ClientProtocolException cpe) {
+				super.onClientProtocolException(cpe);
+				String respStr = getRESTSimpleHelperInstance()
+						.requestFromCache(getRequestUrl());
+				responseToModel(respStr);
+			}
+
+			@Override
+			public void onIOException(IOException ioe) {
+				super.onIOException(ioe);
+				String respStr = getRESTSimpleHelperInstance()
+						.requestFromCache(getRequestUrl());
+				responseToModel(respStr);
+			}
+
+		});
 	}
 
 	@Override

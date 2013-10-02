@@ -12,6 +12,7 @@ import com.framework.leopardus.R;
 
 public class ItemsAdapter extends ArrayAdapter<ApplicationMenuItem> {
 
+	@SuppressWarnings("unused")
 	private int activePosition = -1;
 
 	public ItemsAdapter(Context context) {

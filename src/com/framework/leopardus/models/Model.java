@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -30,7 +31,7 @@ public class Model {
 	public String[] getKeys() {
 		return data.keySet().toArray(new String[] {});
 	}
-	
+
 	public Object getObject(String key) {
 		return data.get(key);
 	}
@@ -44,14 +45,14 @@ public class Model {
 					View subview = v.findViewById(id);
 					storeValue(subview, key);
 				} catch (NumberFormatException e) {
-					e.printStackTrace();
+					Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
+					Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					e.printStackTrace();
+					Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 				}
 			} catch (NoSuchFieldException e) {
-				e.printStackTrace();
+				Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 			}
 		}
 	}
@@ -81,7 +82,18 @@ public class Model {
 		}
 	}
 
+	/**
+	 * This method will be overridden if you can use an unsupported widget.
+	 * 
+	 * @param view
+	 * @param key
+	 */
 	public void customStoreValue(View view, String key) {
+	}
+
+	@Override
+	public String toString() {
+		return data.toString();
 	}
 
 }

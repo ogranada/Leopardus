@@ -140,5 +140,9 @@ public class BaseFragment extends SherlockFragment {
 			}
 		}
 	}
-
+	
+	public String getFragmentName(){
+		return getResources().getString(R.string.app_name);
+	}
+	
 }

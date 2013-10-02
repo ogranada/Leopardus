@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import net.simonvt.menudrawer.MenuDrawer;
+import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
 import net.simonvt.menudrawer.Position;
 import android.annotation.SuppressLint;
 import android.os.Build;
@@ -32,6 +33,7 @@ import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
 import com.framework.leopardus.adapters.ItemsAdapter;
 import com.framework.leopardus.enums.Ubications;
+import com.framework.leopardus.fragments.BaseFragment;
 import com.framework.leopardus.interfaces.ActivityMethodInterface;
 import com.framework.leopardus.interfaces.InjectableActionBarItem;
 import com.framework.leopardus.interfaces.InjectableMenuItems;
@@ -62,6 +64,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 
 	private FragmentManager mFragmentManager;
 	private FragmentTransaction mFragmentTransaction;
+	@SuppressWarnings("unused")
 	private String mCurrentFragmentTag;
 	private int autoExitId = 8802;
 	private int res_drawer = R.drawable.ic_drawer;
@@ -146,7 +149,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 				setActualFragment(getFragment("xxx"), false);
 			}
 		}
-
+		autosetActionBarTitle();
 	}
 
 	public void makeMenuDrawer() {
@@ -158,6 +161,18 @@ public abstract class BaseDrawerFragmentsActivity extends
 		// mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
 		mMenuDrawer.setSlideDrawable(this.res_drawer);
 		mMenuDrawer.setDrawerIndicatorEnabled(true);
+		mMenuDrawer.setOnDrawerStateChangeListener(new OnDrawerStateChangeListener() {
+			
+			@Override
+			public void onDrawerStateChange(int oldState, int newState) {
+				autosetActionBarTitle();
+			}
+			
+			@Override
+			public void onDrawerSlide(float openRatio, int offsetPixels) {
+				
+			}
+		});
 	}
 
 	/**
@@ -182,6 +197,17 @@ public abstract class BaseDrawerFragmentsActivity extends
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+	}
+
+	private Fragment topFragment;
+
+	/**
+	 * Get the actual fragment
+	 * 
+	 * @param frgmnt
+	 */
+	public Fragment getActualFragment() {
+		return topFragment;
 	}
 
 	/**
@@ -217,22 +243,15 @@ public abstract class BaseDrawerFragmentsActivity extends
 				fragments.push(frgmnt);
 			}
 		}
-		// {
-		// attachFragment(mMenuDrawer.getContentContainer().getId(), frgmnt,
-		// mCurrentFragmentTag);
-		// commitTransactions();
-		// }
-		{
-			FragmentTransaction transaction = getSupportFragmentManager()
-					.beginTransaction();
-			// transaction.setCustomAnimations(android.R.anim.slide_in_left,
-			// android.R.anim.slide_out_right);
-			transaction.setCustomAnimations(android.R.anim.slide_in_left,
-					android.R.anim.slide_out_right);
-			transaction.replace(mMenuDrawer.getContentContainer().getId(),
-					frgmnt);
-			transaction.commit();
-		}
+		FragmentTransaction transaction = getSupportFragmentManager()
+				.beginTransaction();
+		transaction.setCustomAnimations(android.R.anim.slide_in_left,
+				android.R.anim.slide_out_right);
+		transaction.replace(mMenuDrawer.getContentContainer().getId(), frgmnt,
+				frgmnt.getTag());
+		transaction.commit();
+		topFragment = frgmnt;
+		autosetActionBarTitle();
 		mMenuDrawer.closeMenu();
 	}
 
@@ -289,32 +308,32 @@ public abstract class BaseDrawerFragmentsActivity extends
 		closeCallback = ami;
 	}
 
-	class InjectMenuItemComparator implements Comparator<InjectMenuItem>{
-		 
-	    @Override
-	    public int compare(InjectMenuItem o1, InjectMenuItem o2) {
-	    	if(o1.position()<o2.position()){
-	    		return -1;
-	    	} else if(o1.position()>o2.position()){
-	    		return 1;
-	    	}
-	        return 0;
-	    }
-	} 
-	
+	class InjectMenuItemComparator implements Comparator<InjectMenuItem> {
+
+		@Override
+		public int compare(InjectMenuItem o1, InjectMenuItem o2) {
+			if (o1.position() < o2.position()) {
+				return -1;
+			} else if (o1.position() > o2.position()) {
+				return 1;
+			}
+			return 0;
+		}
+	}
+
 	@SuppressLint("UseSparseArrays")
 	protected void establishItemsAdapter() {
 		List<InjectMenuItem> localMenuItems = new ArrayList<InjectMenuItem>(0);
 		Map<InjectMenuItem, Integer> keys = new HashMap<InjectMenuItem, Integer>();
 		int size = menuItems.size();
-		for (int i=0;i<size;i++) {
+		for (int i = 0; i < size; i++) {
 			int key = menuItems.keyAt(i);
 			keys.put(menuItems.get(key).first, key);
 			localMenuItems.add(menuItems.get(key).first);
 		}
 		Collections.sort(localMenuItems, new InjectMenuItemComparator());
 		adapter.clear();
-		for (int i=0;i<size;i++) {
+		for (int i = 0; i < size; i++) {
 			InjectMenuItem item = localMenuItems.get(i);
 			ApplicationMenuItem mi = new ApplicationMenuItem(item.stringId(),
 					item.iconId());
@@ -448,7 +467,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 			com.actionbarsherlock.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			mMenuDrawer.toggleMenu();
+			toggleMenu();
 			return true;
 		default:
 			try {
@@ -461,6 +480,31 @@ public abstract class BaseDrawerFragmentsActivity extends
 		return super.onOptionsItemSelected(item);
 	}
 
+	public void toggleMenu() {// TODO:
+		if (mMenuDrawer != null) {
+			mMenuDrawer.toggleMenu();
+			autosetActionBarTitle();
+		}
+	}
+
+	private void autosetActionBarTitle() {
+		if (mMenuDrawer != null) {
+			if (!mMenuDrawer.isMenuVisible()) {
+				if (getActualFragment() instanceof BaseFragment) {
+					getSupportActionBar().setTitle(
+							((BaseFragment) getActualFragment())
+									.getFragmentName());
+				} else {
+					getSupportActionBar().setTitle(
+							getResources().getString(R.string.app_name));
+				}
+			} else {
+				getSupportActionBar().setTitle(
+						getResources().getString(R.string.app_name));
+			}
+		}
+	}
+
 	@Override
 	public void onBackPressed() {
 		final int drawerState = mMenuDrawer.getDrawerState();
@@ -469,7 +513,6 @@ public abstract class BaseDrawerFragmentsActivity extends
 			mMenuDrawer.closeMenu();
 			return;
 		}
-
 		super.onBackPressed();
 	}
 

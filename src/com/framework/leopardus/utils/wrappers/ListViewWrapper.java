@@ -18,27 +18,49 @@ public abstract class ListViewWrapper {
 	private ModelAdapter adapter;
 	private List<Model> rows;
 	private Model lastModel;
+	private ListView lv;
+	private Context ctx;
+	private int row_lyt;
+	private Class R_id_getClass;
 
 	public ListViewWrapper(Activity act, int list_lyt, int row_lyt,
 			Class R_id_getClass) {
-		Context ctx = act.getApplicationContext();
+		ctx = act.getApplicationContext();
+		this.row_lyt = row_lyt;
+		this.R_id_getClass = R_id_getClass;
 		initRows();
-		adapter = new ModelAdapter(ctx, row_lyt, rows, R_id_getClass, this);
-		ListView lv = (ListView) act.findViewById(list_lyt);
-		lv.setAdapter(adapter);
-	}
-
-	private void initRows() {
-		rows = new ArrayList<Model>();
+		lv = (ListView) act.findViewById(list_lyt);
+		try {
+			updateAdapter();
+		} catch (Exception e) {
+		}
 	}
 
 	public ListViewWrapper(View v, int list_lyt, int row_lyt,
 			Class R_id_getClass) {
-		Context ctx = v.getContext();
+		ctx = v.getContext();
+		this.row_lyt = row_lyt;
+		this.R_id_getClass = R_id_getClass;
 		initRows();
-		adapter = new ModelAdapter(ctx, row_lyt, rows, R_id_getClass, this);
-		ListView lv = (ListView) v.findViewById(list_lyt);
-		lv.setAdapter(adapter);
+		lv = (ListView) v.findViewById(list_lyt);
+		try {
+			updateAdapter();
+		} catch (Exception e) {
+		}
+	}
+
+	public void updateAdapter() throws Exception {
+		try {
+			adapter = new ModelAdapter(ctx, row_lyt, rows, R_id_getClass, this);
+			lv.setAdapter(adapter);
+		} catch (Exception e) {
+			throw new Exception(
+					"This event must be called from UI thread, use Activity.runOnUiThread");
+		}
+	}
+
+	private void initRows() {
+		rows = new ArrayList<Model>();
 	}
 
 	public void addItems(Map<String, Object> map) {
@@ -51,6 +73,12 @@ public abstract class ListViewWrapper {
 	public ListViewWrapper addItem(String vw_name, Object value) {
 		Model model = new Model();
 		model.addItem(vw_name, value);
+		rows.add(model);
+		lastModel = model;
+		return this;
+	}
+
+	public ListViewWrapper addItem(Model model) {
 		rows.add(model);
 		lastModel = model;
 		return this;
