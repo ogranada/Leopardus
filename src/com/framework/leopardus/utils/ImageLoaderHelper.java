@@ -40,7 +40,7 @@ public class ImageLoaderHelper {
 		ildr.init(config);
 
 	}
-
+	
 	public void display(String path, ImageView iv) {
 		ildr.displayImage(path, iv);
 	}

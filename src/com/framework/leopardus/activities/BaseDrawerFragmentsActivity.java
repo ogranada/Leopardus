@@ -58,7 +58,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 	@SuppressWarnings("unused")
 	private int mActivePosition;
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
-	Stack<Fragment> fragments = new Stack<Fragment>();
+	private static Stack<Fragment> fragments = new Stack<Fragment>();
 	private static final String STATE_ACTIVE_POSITION = "net.simonvt.menudrawer.samples.LeftDrawerSample.activePosition";
 	private static final String STATE_CURRENT_FRAGMENT = "net.simonvt.menudrawer.samples.FragmentSample";
 
@@ -117,9 +117,8 @@ public abstract class BaseDrawerFragmentsActivity extends
 	@Override
 	public void onCreate(Bundle inState) {
 		super.onCreate(inState);
-
 		if (inState != null) {
-			mActivePosition = inState.getInt(STATE_ACTIVE_POSITION);
+			mActivePosition = inState.getInt(STATE_ACTIVE_POSITION);			
 		}
 		adapter = new ItemsAdapter(this);
 		Injector i = new Injector(this);
@@ -139,6 +138,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 
 		// ======================================================
 
+		
 		mFragmentManager = getSupportFragmentManager();
 		if (inState != null) {
 			mCurrentFragmentTag = inState.getString(STATE_CURRENT_FRAGMENT);
@@ -149,9 +149,10 @@ public abstract class BaseDrawerFragmentsActivity extends
 				setActualFragment(getFragment("xxx"), false);
 			}
 		}
+		
 		autosetActionBarTitle();
 	}
-
+	
 	public void makeMenuDrawer() {
 		mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.Type.OVERLAY,
 				getDrawerPosition(), getDragMode());

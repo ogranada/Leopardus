@@ -41,7 +41,12 @@ public class Injector {
 			if (i != null && i.id() != -1) {
 				a.setAccessible(true);
 				try {
-					Object inst = view.findViewById(i.id());
+					Object inst = null;
+					if (view != null) {
+						inst = view.findViewById(i.id());
+					} else {
+						inst = ((Activity) context).findViewById(i.id());
+					}
 					a.set(obj, inst);
 				} catch (Exception e) {
 					System.err.println("Error: " + e.getMessage());
@@ -66,9 +71,9 @@ public class Injector {
 					ew = new EventWrapper();
 				}
 				View v = null;
-				try {
+				if (view != null) {
 					v = view.findViewById(i.id());
-				} catch (Exception w) {
+				} else {
 					v = ((Activity) context).findViewById(i.id());
 				}
 				if (v != null) {
@@ -131,6 +136,5 @@ public class Injector {
 	}
 
 	// TODO: inject action modes
-	// TODO: change menus lists' by Maps
 	// TODO: inject WebView javascript methods
 }

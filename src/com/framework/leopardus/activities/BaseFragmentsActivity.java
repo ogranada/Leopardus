@@ -49,7 +49,7 @@ public class BaseFragmentsActivity extends SlidingFragmentActivity implements
 	private ProgressDialogHelper pdHelper = new ProgressDialogHelper();
 	private PullToRefreshAttacher pullToRefreshAttacher = null;
 	private boolean enableProgressFeatures = false;
-	Stack<Fragment> fragments = new Stack<Fragment>();
+	private static Stack<Fragment> fragments = new Stack<Fragment>();
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
 	private boolean leftMenuEnabled = true;
 	private boolean rightMenuEnabled = false;

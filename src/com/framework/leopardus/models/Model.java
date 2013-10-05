@@ -1,5 +1,6 @@
 package com.framework.leopardus.models;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +16,12 @@ import android.widget.TextView;
 import com.framework.leopardus.utils.ImageLoaderHelper;
 
 @SuppressWarnings("rawtypes")
-public class Model {
+public class Model implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8084362690902083447L;
 	private Map<String, Object> data = new HashMap<String, Object>();
 
 	public void updateData(Map<String, Object> new_data) {
@@ -43,16 +48,18 @@ public class Model {
 				try {
 					int id = Integer.valueOf(campo.get(null).toString());
 					View subview = v.findViewById(id);
-					storeValue(subview, key);
+					if (subview != null) {
+						storeValue(subview, key);
+					}
 				} catch (NumberFormatException e) {
-					Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
+					Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 				} catch (IllegalArgumentException e) {
-					Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
+					Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
+					Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 				}
 			} catch (NoSuchFieldException e) {
-				Log.e("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
+				Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 			}
 		}
 	}

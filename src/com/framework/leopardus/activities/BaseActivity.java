@@ -4,6 +4,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.OnRefreshListener;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
@@ -12,9 +13,11 @@ import com.framework.leopardus.utils.Injector;
 
 public class BaseActivity extends SherlockActivity {
 
-	private int _layout = R.layout.base_layout;
+	private Integer _layout = R.layout.base_layout;
 	private boolean enableProgressFeatures = false;
 	private PullToRefreshAttacher pullToRefreshAttacher = null;
+
+	private boolean fullscreen = false;
 
 	public BaseActivity() {
 		super();
@@ -33,6 +36,11 @@ public class BaseActivity extends SherlockActivity {
 			requestWindowFeature(Window.FEATURE_PROGRESS);
 			requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		}
+		if (fullscreen) {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+					WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
 		setContentView(_layout);
 		if (enableProgressFeatures) {
 			setSupportProgressBarIndeterminateVisibility(false);
@@ -41,6 +49,10 @@ public class BaseActivity extends SherlockActivity {
 		Injector i = new Injector(this);
 		i.injectViews(this);
 		i.injectMethodsIntoViews(this);
+	}
+
+	public void setFullScreenActivity(boolean fsa) {
+		fullscreen = fsa;
 	}
 
 	public void showProgressBar() {

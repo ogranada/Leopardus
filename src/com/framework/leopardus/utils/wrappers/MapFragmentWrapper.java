@@ -47,7 +47,7 @@ public class MapFragmentWrapper {
 				mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 			} else if (type == TERRAIN) {
 				mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-			}  
+			}
 		}
 	}
 

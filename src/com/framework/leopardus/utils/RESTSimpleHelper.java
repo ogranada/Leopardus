@@ -1,6 +1,7 @@
 package com.framework.leopardus.utils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +17,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
@@ -33,15 +35,20 @@ import com.framework.leopardus.interfaces.RESTCallback;
 import com.framework.leopardus.models.Model;
 import com.framework.leopardus.utils.storage.RESTInternalStorage;
 
-public class RESTSimpleHelper {
+public class RESTSimpleHelper implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1084686258993182978L;
 	private String user;
 	private String host;
 	private String passwd;
 	private HttpClient httpClient;
 	private boolean logged = false;
 	private boolean requirelogin = false;
-	HttpContext localContext = new BasicHttpContext();
+//	private HttpContext localContext = new BasicHttpContext();
+	private HttpParams httpParameters;
 	private static Map<String, RESTSimpleHelper> instances = new HashMap<String, RESTSimpleHelper>();
 	private static RESTInternalStorage rest_is;
 
@@ -77,7 +84,10 @@ public class RESTSimpleHelper {
 	}
 
 	private RESTSimpleHelper(String host, String user, String passwd) {
-		httpClient = new DefaultHttpClient();
+		httpParameters = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParameters, 3000);
+		HttpConnectionParams.setSoTimeout(httpParameters, 5000);
+		httpClient = new DefaultHttpClient(httpParameters);
 		this.host = host;
 		requirelogin = user != null && passwd != null;
 		this.user = user;
@@ -163,7 +173,7 @@ public class RESTSimpleHelper {
 	private void onGet(String apiSection, Map<String, Object> args,
 			RESTCallback callback) {
 		HttpGet get = new HttpGet(host + apiSection);
-		get.setHeader("Content-Type", "application/json");
+		get.setHeader("Content-Type", "application/json;charset=ISO-8859-1");
 		if (requirelogin) {
 			get.addHeader("Authorization", getLoginHeader());
 		}
@@ -194,7 +204,7 @@ public class RESTSimpleHelper {
 	private void onPost(String apiSection, Map<String, Object> args,
 			RESTCallback callback) {
 		HttpPost post = new HttpPost(host + apiSection);
-		post.setHeader("content-type", "application/json");
+		post.setHeader("content-type", "application/json;charset=ISO-8859-1");
 		if (requirelogin) {
 			post.addHeader("Authorization", getLoginHeader());
 		}
@@ -250,7 +260,7 @@ public class RESTSimpleHelper {
 			RESTCallback callback) {
 		// HttpClient httpClient= new DefaultHttpClient();
 		HttpPut put = new HttpPut(host + apiSection);
-		put.setHeader("content-type", "application/json");
+		put.setHeader("content-type", "application/json;charset=ISO-8859-1");
 		if (requirelogin) {
 			put.addHeader("Authorization", getLoginHeader());
 		}
@@ -305,13 +315,13 @@ public class RESTSimpleHelper {
 	private void onDelete(String apiSection, Map<String, Object> args,
 			RESTCallback callback) {
 		HttpDelete del = new HttpDelete(host + apiSection);
-		del.setHeader("Content-Type", "application/json");
+		del.setHeader("Content-Type", "application/json;charset=ISO-8859-1");
 		if (requirelogin) {
 			del.addHeader("Authorization", getLoginHeader());
 		}
 		try {
 			HttpResponse resp;
-			// resp = httpClient.execute(del, localContext);
+//			 resp = httpClient.execute(del, localContext);
 			resp = httpClient.execute(del);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
