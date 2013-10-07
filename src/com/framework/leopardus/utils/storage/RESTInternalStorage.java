@@ -83,6 +83,7 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 		if (cursor != null) {
 			cursor.moveToFirst();
 			String content = cursor.getString(2);
+			cursor.close();
 			return content;
 		} else {
 			return null;
@@ -98,6 +99,7 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			String content = cursor.getString(1);
+			cursor.close();
 			return content;
 		} else {
 			return null;
@@ -114,6 +116,7 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 			if (cursor != null && cursor.getCount() > 0) {
 				cursor.moveToFirst();
 				String id = cursor.getString(0);
+				cursor.close();
 				return Integer.parseInt(id);
 			} else {
 				return -1;
