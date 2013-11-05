@@ -35,6 +35,10 @@ public class MapFragmentWrapper {
 		}
 	}
 
+	public GoogleMap getMap() {
+		return mMap;
+	}
+
 	public void setMapType(int type) {
 		if (mMap != null) {
 			if (type == NONE) {

@@ -14,9 +14,12 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.framework.leopardus.utils.ImageLoaderHelper;
+import com.framework.leopardus.utils.wrappers.ListViewWrapper;
 
 @SuppressWarnings("rawtypes")
-public class Model implements Serializable{
+public class Model implements Serializable {
+
+	public static Boolean DEBUG = false;
 
 	/**
 	 * 
@@ -41,7 +44,9 @@ public class Model implements Serializable{
 		return data.get(key);
 	}
 
-	public void storeValues(View v, Class R_id_class) {
+	public void storeValues(ListViewWrapper wrapper, View v, Class R_id_class) {
+		Map<String, View> views = new HashMap<String, View>();
+		Map<String, String> viewdata = new HashMap<String, String>();
 		for (String key : data.keySet()) {
 			try {
 				Field campo = R_id_class.getField(key.toLowerCase());
@@ -50,6 +55,8 @@ public class Model implements Serializable{
 					View subview = v.findViewById(id);
 					if (subview != null) {
 						storeValue(subview, key);
+						viewdata.put("viewkey_" + key, subview.toString());
+						views.put(subview.toString(), subview);
 					}
 				} catch (NumberFormatException e) {
 					Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
@@ -59,9 +66,13 @@ public class Model implements Serializable{
 					Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
 				}
 			} catch (NoSuchFieldException e) {
-				Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
+				if (DEBUG) {
+					Log.d("Leopardus", "Model Error: " + e.getMessage());// e.printStackTrace();
+				}
 			}
 		}
+		data.putAll(viewdata);
+		wrapper.setViews(views);
 	}
 
 	private void storeValue(View view, String key) {

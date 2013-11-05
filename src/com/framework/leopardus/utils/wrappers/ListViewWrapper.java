@@ -1,6 +1,7 @@
 package com.framework.leopardus.utils.wrappers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,17 @@ public abstract class ListViewWrapper {
 	private Context ctx;
 	private int row_lyt;
 	private Class R_id_getClass;
+
+	private Map<String, View> views = new HashMap<String, View>(0);
+	
+	
+	public void setViews(Map<String, View> vws) {
+		views = vws;
+	}
+	
+	public View getView(String name) {
+		return views.get(name);
+	}
 
 	public ListViewWrapper(Activity act, int list_lyt, int row_lyt,
 			Class R_id_getClass) {
@@ -91,6 +103,12 @@ public abstract class ListViewWrapper {
 		} else {
 			return addItem(vw_name, value);
 		}
+	}
+
+	public void clear() {
+		rows = null;
+		System.gc();
+		rows = new ArrayList<Model>();
 	}
 
 	public abstract void overrideEvents(View v, Model model);

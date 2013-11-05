@@ -29,6 +29,7 @@ import android.widget.ListView;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.framework.leopardus.R;
 import com.framework.leopardus.adapters.ApplicationMenuItem;
 import com.framework.leopardus.adapters.ItemsAdapter;
@@ -48,6 +49,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 		InjectableActionBarItem {
 	protected MenuDrawer mMenuDrawer;
 	protected ItemsAdapter adapter;
+	private boolean enableProgressFeatures = false;
 	private ListView mList;
 	SparseArray<Pair<InjectMenuItem, MenuItemEvent>> menuItems = new SparseArray<Pair<InjectMenuItem, MenuItemEvent>>(
 			0);
@@ -118,7 +120,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 	public void onCreate(Bundle inState) {
 		super.onCreate(inState);
 		if (inState != null) {
-			mActivePosition = inState.getInt(STATE_ACTIVE_POSITION);			
+			mActivePosition = inState.getInt(STATE_ACTIVE_POSITION);
 		}
 		adapter = new ItemsAdapter(this);
 		Injector i = new Injector(this);
@@ -126,6 +128,17 @@ public abstract class BaseDrawerFragmentsActivity extends
 		i.injectMenuItems(this);
 		i.injectActionBarItems(this);
 		i.injectMethodsIntoViews(this);
+
+		if (enableProgressFeatures) {
+			requestWindowFeature(Window.FEATURE_PROGRESS);
+			requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		}
+
+		if (enableProgressFeatures) {
+			setSupportProgressBarIndeterminateVisibility(false);
+			setSupportProgressBarVisibility(false);
+		}
+
 		// setContentView(R.layout.menu_frame);
 		mList = new ListView(this);
 		establishItemsAdapter();
@@ -138,7 +151,6 @@ public abstract class BaseDrawerFragmentsActivity extends
 
 		// ======================================================
 
-		
 		mFragmentManager = getSupportFragmentManager();
 		if (inState != null) {
 			mCurrentFragmentTag = inState.getString(STATE_CURRENT_FRAGMENT);
@@ -149,10 +161,10 @@ public abstract class BaseDrawerFragmentsActivity extends
 				setActualFragment(getFragment("xxx"), false);
 			}
 		}
-		
+
 		autosetActionBarTitle();
 	}
-	
+
 	public void makeMenuDrawer() {
 		mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.Type.OVERLAY,
 				getDrawerPosition(), getDragMode());
@@ -162,18 +174,19 @@ public abstract class BaseDrawerFragmentsActivity extends
 		// mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
 		mMenuDrawer.setSlideDrawable(this.res_drawer);
 		mMenuDrawer.setDrawerIndicatorEnabled(true);
-		mMenuDrawer.setOnDrawerStateChangeListener(new OnDrawerStateChangeListener() {
-			
-			@Override
-			public void onDrawerStateChange(int oldState, int newState) {
-				autosetActionBarTitle();
-			}
-			
-			@Override
-			public void onDrawerSlide(float openRatio, int offsetPixels) {
-				
-			}
-		});
+		mMenuDrawer
+				.setOnDrawerStateChangeListener(new OnDrawerStateChangeListener() {
+
+					@Override
+					public void onDrawerStateChange(int oldState, int newState) {
+						autosetActionBarTitle();
+					}
+
+					@Override
+					public void onDrawerSlide(float openRatio, int offsetPixels) {
+
+					}
+				});
 	}
 
 	/**
@@ -190,6 +203,10 @@ public abstract class BaseDrawerFragmentsActivity extends
 	public void enableLightDrawer() {
 		this.res_drawer = R.drawable.ic_drawer_light;
 		changeDrawer();
+	}
+
+	public void setEnableProgressFeatures(boolean enableProgressFeatures) {
+		this.enableProgressFeatures = enableProgressFeatures;
 	}
 
 	private void changeDrawer() {

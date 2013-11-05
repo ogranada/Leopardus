@@ -1,6 +1,8 @@
 package com.framework.leopardus.adapters;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -49,8 +51,15 @@ public class ModelAdapter extends BaseAdapter {
 		if (convertView == null) {
 			convertView = inflater.inflate(layout, null);
 		}
-		rows.get(position).storeValues(convertView, Ridclass);
+		rows.get(position).storeValues(wrapper, convertView, Ridclass);
 		wrapper.overrideEvents(convertView,rows.get(position));
 		return convertView;
 	}
+	
+	public void clear() {
+		rows = null;
+		System.gc();
+		rows = new ArrayList<Model>();
+	}
+	
 }

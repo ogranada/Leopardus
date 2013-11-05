@@ -42,9 +42,14 @@ public abstract class RESTCallback {
 	public abstract void onFinish(int status, String section, HttpResponse resp);
 
 	public void onClientProtocolException(ClientProtocolException cpe) {
-		Log.e("Leopardus",
-				"RestSimpleHelper: Error with client protocol: "
-						+ cpe.getMessage());
+		Log.e("Leopardus", "RestSimpleHelper: Error with client protocol: "
+				+ cpe.getMessage());
+	}
+
+	public void onStarted() {
+	}
+
+	public void onFinished() {
 	}
 
 	public void onIOException(IOException ioe) {

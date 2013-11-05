@@ -35,7 +35,7 @@ import com.framework.leopardus.interfaces.RESTCallback;
 import com.framework.leopardus.models.Model;
 import com.framework.leopardus.utils.storage.RESTInternalStorage;
 
-public class RESTSimpleHelper implements Serializable{
+public class RESTSimpleHelper implements Serializable {
 
 	/**
 	 * 
@@ -47,7 +47,7 @@ public class RESTSimpleHelper implements Serializable{
 	private HttpClient httpClient;
 	private boolean logged = false;
 	private boolean requirelogin = false;
-//	private HttpContext localContext = new BasicHttpContext();
+	// private HttpContext localContext = new BasicHttpContext();
 	private HttpParams httpParameters;
 	private static Map<String, RESTSimpleHelper> instances = new HashMap<String, RESTSimpleHelper>();
 	private static RESTInternalStorage rest_is;
@@ -139,6 +139,11 @@ public class RESTSimpleHelper implements Serializable{
 
 	public void request(final RESTHeaders protocol, String apiSection,
 			final Map<String, Object> args, final RESTCallback callback) {
+		try {
+			callback.onStarted();
+		} catch (Exception e) {
+			Log.e("Leopardus", "Error on onStart execution");
+		}
 		if (apiSection.startsWith("/")) {
 			apiSection = apiSection.substring(1);
 		}
@@ -162,6 +167,11 @@ public class RESTSimpleHelper implements Serializable{
 					onPut(APISection, args, callback);
 				} else if (protocol.equals(RESTHeaders.DELETE)) {
 					onDelete(APISection, null, callback);
+				}
+				try {
+					callback.onFinished();
+				} catch (Exception e) {
+					Log.e("Leopardus", "Error on onStart execution");
 				}
 			}
 		};
@@ -321,7 +331,7 @@ public class RESTSimpleHelper implements Serializable{
 		}
 		try {
 			HttpResponse resp;
-//			 resp = httpClient.execute(del, localContext);
+			// resp = httpClient.execute(del, localContext);
 			resp = httpClient.execute(del);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
@@ -359,6 +369,16 @@ public class RESTSimpleHelper implements Serializable{
 	public void getModelFomRequest(String url, final ModelCallback callback) {
 		this.request(RESTHeaders.GET, url, new RESTCallback(this) {
 			@Override
+			public void onStarted() {
+				callback.onStarted();
+			}
+
+			@Override
+			public void onFinished() {
+				callback.onFinished();
+			}
+
+			@Override
 			public void onFinish(int status, String section, HttpResponse resp) {
 				if (status >= 200 && status < 300) {
 					try {
@@ -368,6 +388,13 @@ public class RESTSimpleHelper implements Serializable{
 						responseToModel(respStr);
 					} catch (Exception e) {
 						e.printStackTrace();
+					}
+				} else if(status>=400 && status<500){
+					try {
+						String respStr = EntityUtils.toString(resp.getEntity());
+						callback.onObjectNotFound(status,respStr);
+					} catch (Exception e) {
+						callback.onObjectNotFound(status,"Error loading object");
 					}
 				}
 			}
