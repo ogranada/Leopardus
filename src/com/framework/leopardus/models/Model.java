@@ -31,6 +31,10 @@ public class Model implements Serializable {
 		data.putAll(new_data);
 	}
 
+	public void updateData(Model new_data) {
+		data.putAll(new_data.data);
+	}
+
 	public Model addItem(String key, Object value) {
 		data.put(key, value);
 		return this;
