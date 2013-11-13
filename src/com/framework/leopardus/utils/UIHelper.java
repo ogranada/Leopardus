@@ -32,4 +32,22 @@ public class UIHelper {
 				.setNegativeButton(c.getString(R.string.no),
 						dialogClickListener).show();
 	}
+	
+	public static void dialogOkay(final Activity c, final String message,
+			final ActivityMethodInterface onOk) {
+		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which) {
+				case DialogInterface.BUTTON_NEUTRAL:
+					onOk.Method(c);
+					break;UIHelper
+				}
+			}
+		};
+		AlertDialog.Builder builder = new AlertDialog.Builder(c);
+		builder.setMessage(message)
+		.setNeutralButton(c.getString(R.string.ok),
+						dialogClickListener).show();
+	}
 }

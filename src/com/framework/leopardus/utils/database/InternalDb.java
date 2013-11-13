@@ -129,6 +129,22 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 		}
 	}
 
+	public List<Model> Query(String query) {
+		List<Model> returnList = new ArrayList<Model>(0);
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.rawQuery(query, null);
+		if (cursor.moveToFirst()) {
+			do {
+				Model obj = new Model();
+				for (int i = 0; i < cursor.getColumnCount(); i++) {
+					obj.addItem(cursor.getColumnName(i), cursor.getString(i));
+				}
+				returnList.add(obj);
+			} while (cursor.moveToNext());
+		}
+		return returnList;
+	}
+
 	public int getRegisterCount(String table) throws Exception {
 		if (tables.containsKey(table)) {
 			String countQuery = "SELECT  COUNT(*) as count FROM " + table;

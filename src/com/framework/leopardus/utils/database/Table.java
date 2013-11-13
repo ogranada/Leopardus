@@ -47,10 +47,24 @@ public class Table {
 		sql += "CREATE TABLE " + name + "(";
 		String field_sep = "";
 		for (String name : columns.keySet()) {
+			String type = ((ColumnTypes) columns.get(name)).toString();
+			if (type.contains("_")) {
+				if (type.contains("__")) {
+					type = type.replace("__", " DEFAULT ") + " ";
+					if (type.contains(" NOW ")) {
+						type = type.replace(" NOW ", " CURRENT_TIMESTAMP ");
+					}
+				} else {
+					type = type.replace("_", " ") + " ";
+				}
+			}
 			sql += field_sep
-					+ String.format("%s %s%s", name,
-							((ColumnTypes) columns.get(name)).toString(),
+					+ String.format("%s %s%s", name, type,
 							pkName.equals(name) ? "PRIMARY KEY" : "");
+			sql = sql.contains("AUTOINCREMENT PRIMARY KEY") ? sql.replace(
+					"AUTOINCREMENT PRIMARY KEY", "PRIMARY KEY AUTOINCREMENT")
+					: sql;
+
 			if (field_sep.equals("")) {
 				field_sep = ", ";
 			}
