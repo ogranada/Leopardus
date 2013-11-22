@@ -32,22 +32,27 @@ public class UIHelper {
 				.setNegativeButton(c.getString(R.string.no),
 						dialogClickListener).show();
 	}
-	
+
 	public static void dialogOkay(final Activity c, final String message,
-			final ActivityMethodInterface onOk) {
+			final ActivityMethodInterface onOk, boolean cancelable) {
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which) {
 				case DialogInterface.BUTTON_NEUTRAL:
 					onOk.Method(c);
-					break;UIHelper
+					break;
 				}
 			}
 		};
 		AlertDialog.Builder builder = new AlertDialog.Builder(c);
 		builder.setMessage(message)
-		.setNeutralButton(c.getString(R.string.ok),
-						dialogClickListener).show();
+				.setNeutralButton(c.getString(R.string.ok), dialogClickListener)
+				.setCancelable(cancelable).show();
+	}
+
+	public static void dialogOkay(final Activity c, final String message,
+			final ActivityMethodInterface onOk) {
+		dialogOkay(c, message, onOk, true);
 	}
 }

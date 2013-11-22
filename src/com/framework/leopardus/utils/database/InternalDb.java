@@ -161,7 +161,7 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 		}
 	}
 
-	public int updateContact(String table, Model data, String referenceColumn)
+	public int Update(String table, Model data, String referenceColumn)
 			throws Exception {
 		if (tables.containsKey(table)) {
 			SQLiteDatabase db = this.getWritableDatabase();
@@ -188,7 +188,7 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 		}
 	}
 
-	public void deleteContact(String table, Model data) throws Exception {
+	public void Delete(String table, Model data) throws Exception {
 		if (tables.containsKey(table)) {
 			SQLiteDatabase db = this.getWritableDatabase();
 			String pk = tables.get(table).getPkName();

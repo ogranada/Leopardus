@@ -67,7 +67,7 @@ public abstract class ListViewWrapper {
 			lv.setAdapter(adapter);
 		} catch (Exception e) {
 			throw new Exception(
-					"This event must be called from UI thread, use Activity.runOnUiThread");
+					"Error: "+e.getMessage()+"\n Remember:\nThis event must be called from UI thread, use Activity.runOnUiThread");
 		}
 	}
 

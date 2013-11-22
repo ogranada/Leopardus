@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="SearchView">
+        <attr name="ubication">
+            <enum name="IZQUIERDA" value="0" />
+            <enum name="DERECHA" value="1" />
+        </attr>
+    </declare-styleable>
+
+</resources>
