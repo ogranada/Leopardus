@@ -32,7 +32,7 @@
         android:layout_margin="2dp"
         android:layout_toLeftOf="@+id/btn_search_right"
         android:layout_toRightOf="@+id/btn_search_left"
-        android:background="@drawable/shape_background"
+        android:background="@color/transparente"
         android:ems="10"
         android:focusable="true"
         android:focusableInTouchMode="true"
