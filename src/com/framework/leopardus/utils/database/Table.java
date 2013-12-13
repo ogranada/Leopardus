@@ -3,12 +3,14 @@ package com.framework.leopardus.utils.database;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.util.Log;
 import android.util.Pair;
 
 public class Table {
 	private String name;
 	private String pkName;
 	private Map<String, ColumnTypes> columns;
+	public static Boolean DEBUG = false;
 
 	public Table(String name) {
 		this.name = name;
@@ -60,9 +62,10 @@ public class Table {
 			}
 			sql += field_sep
 					+ String.format("%s %s%s", name, type,
-							pkName.equals(name) ? "PRIMARY KEY" : "");
+							pkName.equals(name) ? " PRIMARY KEY" : " ");
+			sql = sql.replaceAll("  ", " ");
 			sql = sql.contains("AUTOINCREMENT PRIMARY KEY") ? sql.replace(
-					"AUTOINCREMENT PRIMARY KEY", "PRIMARY KEY AUTOINCREMENT")
+					"AUTOINCREMENT PRIMARY KEY", " PRIMARY KEY AUTOINCREMENT ")
 					: sql;
 
 			if (field_sep.equals("")) {
@@ -70,6 +73,9 @@ public class Table {
 			}
 		}
 		sql += ")";
+		if (DEBUG) {
+			Log.i("Leopardus",sql);
+		}
 		return sql;
 	}
 

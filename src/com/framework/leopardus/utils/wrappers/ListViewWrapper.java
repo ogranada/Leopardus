@@ -24,13 +24,20 @@ public abstract class ListViewWrapper {
 	private int row_lyt;
 	private Class R_id_getClass;
 
+	public static interface ListViewWrapperAction {
+		void run(List<Model> rows, ModelAdapter adapter, ListView lv);
+	}
+
+	private ListViewWrapperAction onPreUpdate;
+	private ListViewWrapperAction onPostUpdate;
+	private ListViewWrapperAction onNoItemsAdded;
+
 	private Map<String, View> views = new HashMap<String, View>(0);
-	
-	
+
 	public void setViews(Map<String, View> vws) {
 		views = vws;
 	}
-	
+
 	public View getView(String name) {
 		return views.get(name);
 	}
@@ -63,11 +70,27 @@ public abstract class ListViewWrapper {
 
 	public void updateAdapter() throws Exception {
 		try {
-			adapter = new ModelAdapter(ctx, row_lyt, rows, R_id_getClass, this);
+			if (onPreUpdate != null) {
+				onPreUpdate.run(rows, adapter, lv);
+			}
+			if (onNoItemsAdded != null && rows.size()==0) {
+				List<Model> rows2 = new ArrayList<Model>(0);
+				onNoItemsAdded.run(rows2, adapter, lv);
+				adapter = new ModelAdapter(ctx, row_lyt, rows2, R_id_getClass,
+						this);
+			} else {
+				adapter = new ModelAdapter(ctx, row_lyt, rows, R_id_getClass,
+						this);
+			}
 			lv.setAdapter(adapter);
+			if (onPostUpdate != null) {
+				onPostUpdate.run(rows, adapter, lv);
+			}
 		} catch (Exception e) {
 			throw new Exception(
-					"Error: "+e.getMessage()+"\n Remember:\nThis event must be called from UI thread, use Activity.runOnUiThread");
+					"Error: "
+							+ e.getMessage()
+							+ "\n Remember:\nThis event must be called from UI thread, use Activity.runOnUiThread");
 		}
 	}
 
@@ -109,6 +132,18 @@ public abstract class ListViewWrapper {
 		rows = null;
 		System.gc();
 		rows = new ArrayList<Model>();
+	}
+
+	public void setOnPostUpdate(ListViewWrapperAction onPostUpdate) {
+		this.onPostUpdate = onPostUpdate;
+	}
+
+	public void setOnPreUpdate(ListViewWrapperAction onPreUpdate) {
+		this.onPreUpdate = onPreUpdate;
+	}
+
+	public void setOnNoItemsAdded(ListViewWrapperAction onNoItemsAdded) {
+		this.onNoItemsAdded = onNoItemsAdded;
 	}
 
 	public abstract void overrideEvents(View v, Model model);

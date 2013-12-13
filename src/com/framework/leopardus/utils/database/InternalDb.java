@@ -1,5 +1,9 @@
 package com.framework.leopardus.utils.database;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +15,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 
 import com.framework.leopardus.models.Model;
 
@@ -53,14 +58,14 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 	}
 
 	// /////////////// CRUD OPERATIONS /////////////////
-	public void Add(String table, Model data) {
+	public void Add(String table, Model data) throws Exception {
 		if (tables.containsKey(table)) {
 			SQLiteDatabase db = this.getWritableDatabase();
 			ContentValues values = new ContentValues();
 			for (String column : data.getKeys()) {
 				values.put(column, data.getObject(column).toString());
 			}
-			db.insert(table, null, values);
+			db.insertOrThrow(table, null, values);
 			db.close();
 		} else {
 			throw new RuntimeException(String.format("table %s doesn't exist",
@@ -192,8 +197,10 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 		if (tables.containsKey(table)) {
 			SQLiteDatabase db = this.getWritableDatabase();
 			String pk = tables.get(table).getPkName();
-			db.delete(table, pk + " = ?",
-					new String[] { String.valueOf(data.getObject(pk)) });
+//			db.delete(table, pk + " = ?",
+//					new String[] { String.valueOf(data.getObject(pk)) });
+			String query = String.format("DELETE FROM %s WHERE %s='%s'", table,pk,String.valueOf(data.getObject(pk)));
+			db.rawQuery(query, null);
 			db.close();
 		} else {
 			throw new RuntimeException(String.format("table %s doesn't exist",
@@ -204,5 +211,29 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 	// /////////////////////////////////////////////////
 
 	public abstract void tablesSpecification();
+	
+	
+	public void exportDatabse(String databaseName, String packageName, String backupDBPath) {
+        try {
+            File sd = Environment.getExternalStorageDirectory();
+            File data = Environment.getDataDirectory();
+
+            if (sd.canWrite()) {
+                String currentDBPath = "//data//"+packageName+"//databases//"+databaseName+"";
+                File currentDB = new File(data, currentDBPath);
+                File backupDB = new File(sd, backupDBPath);
+
+                if (currentDB.exists()) {
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
 
 }

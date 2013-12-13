@@ -77,6 +77,11 @@ public class MapFragmentWrapper {
 		Marker m = mMap.addMarker(options);
 		return m;
 	}
+	
+	public void enableMyLocation() {
+		mMap.setMyLocationEnabled(true);
+		mMap.setIndoorEnabled(true);
+	}
 
 	public Marker createMarker(String title, double lat, double lng) {
 		return createMarker(title, lat, lng, null, -1);
@@ -122,4 +127,8 @@ public class MapFragmentWrapper {
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Location, zoom));
 	}
 
+	public void clear() {
+		mMap.clear();
+	}
+	
 }

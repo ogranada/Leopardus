@@ -65,8 +65,8 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 	public void addContent(String url, String content) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put(KEY_URL, url); // Contact Name
-		values.put(KEY_CONTENT, content); // Contact Phone Number
+		values.put(KEY_URL, url); 
+		values.put(KEY_CONTENT, content); 
 		// Inserting Row
 		db.insert(TABLE_CONTENTS, null, values);
 		db.close(); // Closing database connection
@@ -151,8 +151,8 @@ public class RESTInternalStorage extends SQLiteOpenHelper {
 		}
 	}
 
-	// Deleting single contact
-	public void deleteContact(String url) {
+	// Deleting single content
+	public void deleteContent(String url) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete(TABLE_CONTENTS, KEY_URL + " = ?",
 				new String[] { String.valueOf(url) });

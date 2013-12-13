@@ -30,6 +30,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.framework.leopardus.enums.RESTHeaders;
+import com.framework.leopardus.interfaces.MethodInterface;
 import com.framework.leopardus.interfaces.ModelCallback;
 import com.framework.leopardus.interfaces.RESTCallback;
 import com.framework.leopardus.models.Model;
@@ -389,12 +390,13 @@ public class RESTSimpleHelper implements Serializable {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				} else if(status>=400 && status<500){
+				} else if (status >= 400 && status < 500) {
 					try {
 						String respStr = EntityUtils.toString(resp.getEntity());
-						callback.onObjectNotFound(status,respStr);
+						callback.onObjectNotFound(status, respStr);
 					} catch (Exception e) {
-						callback.onObjectNotFound(status,"Error loading object");
+						callback.onObjectNotFound(status,
+								"Error loading object");
 					}
 				}
 			}
@@ -471,17 +473,21 @@ public class RESTSimpleHelper implements Serializable {
 			@Override
 			public void onClientProtocolException(ClientProtocolException cpe) {
 				super.onClientProtocolException(cpe);
-				String respStr = getRESTSimpleHelperInstance()
-						.requestFromCache(getRequestUrl());
-				responseToModel(respStr);
+				if (rest_is != null) {
+					String respStr = getRESTSimpleHelperInstance()
+							.requestFromCache(getRequestUrl());
+					responseToModel(respStr);
+				}
 			}
 
 			@Override
 			public void onIOException(IOException ioe) {
 				super.onIOException(ioe);
-				String respStr = getRESTSimpleHelperInstance()
-						.requestFromCache(getRequestUrl());
-				responseToModel(respStr);
+				if (rest_is != null) {
+					String respStr = getRESTSimpleHelperInstance()
+							.requestFromCache(getRequestUrl());
+					responseToModel(respStr);
+				}
 			}
 
 		});

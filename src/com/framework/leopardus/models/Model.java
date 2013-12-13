@@ -113,6 +113,18 @@ public class Model implements Serializable {
 	public void customStoreValue(View view, String key) {
 	}
 
+	public Model clone() {
+		Model m = new Model();
+		for (String key : data.keySet()) {
+			m.addItem(key, data.get(key));
+		}
+		return m;
+	}
+	
+	public void remove(String key) {
+		data.remove(key);
+	}
+	
 	@Override
 	public String toString() {
 		return data.toString();
