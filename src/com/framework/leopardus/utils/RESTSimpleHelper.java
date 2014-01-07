@@ -184,7 +184,7 @@ public class RESTSimpleHelper implements Serializable {
 	private void onGet(String apiSection, Map<String, Object> args,
 			RESTCallback callback) {
 		HttpGet get = new HttpGet(host + apiSection);
-		get.setHeader("Content-Type", "application/json;charset=ISO-8859-1");
+		get.setHeader("Content-Type", "application/json;charset=UTF-8");
 		if (requirelogin) {
 			get.addHeader("Authorization", getLoginHeader());
 		}
@@ -214,8 +214,10 @@ public class RESTSimpleHelper implements Serializable {
 
 	private void onPost(String apiSection, Map<String, Object> args,
 			RESTCallback callback) {
+		String CODEPAGE = "UTF-8";
 		HttpPost post = new HttpPost(host + apiSection);
-		post.setHeader("content-type", "application/json;charset=ISO-8859-1");
+		post.setHeader("Content-type", "application/json;charset=" + CODEPAGE);
+		post.setHeader("Accept", "application/json");
 		if (requirelogin) {
 			post.addHeader("Authorization", getLoginHeader());
 		}
@@ -234,7 +236,7 @@ public class RESTSimpleHelper implements Serializable {
 			}
 		}
 		try {
-			StringEntity entity = new StringEntity(dato.toString());
+			StringEntity entity = new StringEntity(dato.toString(), CODEPAGE);
 			post.setEntity(entity);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(
@@ -271,7 +273,7 @@ public class RESTSimpleHelper implements Serializable {
 			RESTCallback callback) {
 		// HttpClient httpClient= new DefaultHttpClient();
 		HttpPut put = new HttpPut(host + apiSection);
-		put.setHeader("content-type", "application/json;charset=ISO-8859-1");
+		put.setHeader("content-type", "application/json;charset=UTF-8");
 		if (requirelogin) {
 			put.addHeader("Authorization", getLoginHeader());
 		}
@@ -326,7 +328,7 @@ public class RESTSimpleHelper implements Serializable {
 	private void onDelete(String apiSection, Map<String, Object> args,
 			RESTCallback callback) {
 		HttpDelete del = new HttpDelete(host + apiSection);
-		del.setHeader("Content-Type", "application/json;charset=ISO-8859-1");
+		del.setHeader("Content-Type", "application/json;charset=UTF-8");
 		if (requirelogin) {
 			del.addHeader("Authorization", getLoginHeader());
 		}

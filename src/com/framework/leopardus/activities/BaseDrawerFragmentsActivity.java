@@ -247,7 +247,12 @@ public abstract class BaseDrawerFragmentsActivity extends
 				if (!fragments.contains(frgmnt) && !frgmnt.equals(top)) {
 					fragments.push(top);
 					fragments.push(frgmnt);
-				} else {
+				} else if(top.equals(frgmnt)){
+					fragments.push(top);
+					//Nothing to do...
+					toggleMenu();
+					return;
+				}else{
 					fragments.push(top);
 					if (fragments.contains(frgmnt)) {
 						top = null;
