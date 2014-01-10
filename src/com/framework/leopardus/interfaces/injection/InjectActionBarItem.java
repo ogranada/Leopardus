@@ -17,4 +17,5 @@ public @interface InjectActionBarItem {
 	int itemPosition() default Menu.NONE;
 	boolean ItemAsIcon() default false;
 	int showAs() default MenuItem.SHOW_AS_ACTION_WITH_TEXT;
+	boolean isVisible() default true;
 }

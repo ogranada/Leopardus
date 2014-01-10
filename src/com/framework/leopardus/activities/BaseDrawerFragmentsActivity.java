@@ -513,8 +513,8 @@ public abstract class BaseDrawerFragmentsActivity extends
 							((BaseFragment) getActualFragment())
 									.getFragmentName());
 				} else {
-					getSupportActionBar().setTitle(
-							getResources().getString(R.string.app_name));
+					String s = String.valueOf(getResources().getString(R.string.app_name));
+					getSupportActionBar().setTitle(s);
 				}
 			} else {
 				getSupportActionBar().setTitle(
@@ -534,6 +534,8 @@ public abstract class BaseDrawerFragmentsActivity extends
 		super.onBackPressed();
 	}
 
+	protected Map<Integer,MenuItem> abItems = new HashMap<Integer, MenuItem>();
+	
 	public boolean onCreateOptionsMenu(Menu menu) {
 		for (int j = 0; j < abData.size(); j++) {
 			int key = abData.keyAt(j);
@@ -542,11 +544,15 @@ public abstract class BaseDrawerFragmentsActivity extends
 			MenuItem mi = menu.add(Menu.NONE, key, i.itemPosition(),
 					i.stringId());
 			mi.setIcon(i.iconId());
+			
+			mi.setVisible( i.isVisible() );
+			
 			if (i.ItemAsIcon()) {
 				mi.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 			} else {
 				mi.setShowAsAction(i.showAs());
 			}
+			abItems.put(i.ItemId(), mi);
 		}
 		return super.onCreateOptionsMenu(menu);
 	}

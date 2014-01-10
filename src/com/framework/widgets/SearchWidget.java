@@ -26,7 +26,7 @@ public class SearchWidget extends LinearLayout {
 
 	Button searchLeft;
 	Button searchRight;
-	EditText search;
+	private EditText search;
 	LinearLayout backsearch;
 	SearchView.OnQueryTextListener queryTextListener;
 
@@ -58,9 +58,9 @@ public class SearchWidget extends LinearLayout {
 		searchLeft = (Button) findViewById(R.id.btn_search_left);
 		searchRight = (Button) findViewById(R.id.btn_search_right);
 		backsearch = (LinearLayout) findViewById(R.id.lay_fondo_busqueda);
-		search = (EditText) findViewById(R.id.txt_search);
+		setSearch((EditText) findViewById(R.id.txt_search));
 		clearSearchFocus();
-		search.addTextChangedListener(new TextWatcher() {
+		getSearch().addTextChangedListener(new TextWatcher() {
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before,
@@ -82,7 +82,7 @@ public class SearchWidget extends LinearLayout {
 			@Override
 			public void onClick(View arg0) {
 				queryTextListener
-						.onQueryTextSubmit(search.getText().toString());
+						.onQueryTextSubmit(getSearch().getText().toString());
 			}
 		};
 		searchLeft.setOnClickListener(searchbtnocl);
@@ -90,9 +90,9 @@ public class SearchWidget extends LinearLayout {
 	}
 
 	public void clearSearchFocus() {
-		if (search != null) {
-			search.clearFocus();
-			search.setSelected(false);
+		if (getSearch() != null) {
+			getSearch().clearFocus();
+			getSearch().setSelected(false);
 		}
 	}
 
@@ -142,9 +142,17 @@ public class SearchWidget extends LinearLayout {
 
 	public void setTextColor(int color) {
 		try {
-			search.setTextColor(color);
+			getSearch().setTextColor(color);
 		} catch (Exception e) {
 		}
+	}
+
+	public EditText getSearch() {
+		return search;
+	}
+
+	public  void setSearch(EditText search) {
+		this.search = search;
 	}
 	
 }
