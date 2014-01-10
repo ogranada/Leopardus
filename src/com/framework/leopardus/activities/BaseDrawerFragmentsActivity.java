@@ -244,17 +244,24 @@ public abstract class BaseDrawerFragmentsActivity extends
 		if (addToStack) {
 			if (fragments.size() > 0) {
 				Fragment top = fragments.pop();
-				if (!fragments.contains(frgmnt) && !frgmnt.equals(top)) {
+				if (top.equals(frgmnt)) {
 					fragments.push(top);
-					fragments.push(frgmnt);
+					// Nothing to do...
+					toggleMenu();
+					return;
 				} else {
-					fragments.push(top);
-					if (fragments.contains(frgmnt)) {
-						top = null;
-						while (!frgmnt.equals(top)) {
-							top = fragments.pop();
-						}
+					if (!fragments.contains(frgmnt) && !frgmnt.equals(top)) {
+						fragments.push(top);
 						fragments.push(frgmnt);
+					} else {
+						fragments.push(top);
+						if (fragments.contains(frgmnt)) {
+							top = null;
+							while (!frgmnt.equals(top)) {
+								top = fragments.pop();
+							}
+							fragments.push(frgmnt);
+						}
 					}
 				}
 			} else if (fragments.size() == 0) {
