@@ -9,14 +9,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -30,7 +35,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.framework.leopardus.enums.RESTHeaders;
-import com.framework.leopardus.interfaces.MethodInterface;
 import com.framework.leopardus.interfaces.ModelCallback;
 import com.framework.leopardus.interfaces.RESTCallback;
 import com.framework.leopardus.models.Model;
@@ -216,28 +220,43 @@ public class RESTSimpleHelper implements Serializable {
 			RESTCallback callback) {
 		String CODEPAGE = "UTF-8";
 		HttpPost post = new HttpPost(host + apiSection);
-		post.setHeader("Content-type", "application/json;charset=" + CODEPAGE);
-		post.setHeader("Accept", "application/json");
+		post.setHeader("Content-type", "application/json; charset=" + CODEPAGE);
 		if (requirelogin) {
 			post.addHeader("Authorization", getLoginHeader());
 		}
-		JSONObject dato = new JSONObject();
-		if (args != null) {
-			for (String llave : args.keySet()) {
-				try {
-					dato.put(llave, args.get(llave));
-				} catch (JSONException e) {
-					throw new RuntimeException(
-							"Leopardus(RestSimpleTool): Error adding argument "
-									+ llave + ":"
-									+ String.valueOf(args.get(llave))
-									+ " to request: " + e.getMessage());
-				}
+//		JSONObject dato = new JSONObject();
+//		if (args != null) {
+//			for (String llave : args.keySet()) {
+//				try {
+//					dato.put(llave, args.get(llave));
+//				} catch (JSONException e) {
+//					throw new RuntimeException(
+//							"Leopardus(RestSimpleTool): Error adding argument "
+//									+ llave + ":"
+//									+ String.valueOf(args.get(llave))
+//									+ " to request: " + e.getMessage());
+//				}
+//			}
+//		}
+		
+
+	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+	    for (String llave : args.keySet()) {
+	    	try {
+	    		nameValuePairs.add(new BasicNameValuePair(llave, args.get(llave).toString()));
+			} catch (Exception e) {
+				throw new RuntimeException(
+				"Leopardus(RestSimpleTool): Error adding argument "
+						+ llave + ":"
+						+ String.valueOf(args.get(llave))
+						+ " to request: " + e.getMessage());
 			}
-		}
+	    }
+		
 		try {
-			StringEntity entity = new StringEntity(dato.toString(), CODEPAGE);
-			post.setEntity(entity);
+//			StringEntity entity = new StringEntity(dato.toString(), CODEPAGE);
+//			post.setEntity(entity);
+			post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(
 					"Leopardus(RestSimpleTool): Error with argument coding: "
@@ -246,7 +265,8 @@ public class RESTSimpleHelper implements Serializable {
 		try {
 			HttpResponse resp;
 			// resp = httpClient.execute(post, localContext);
-			resp = httpClient.execute(post);
+		    ResponseHandler responseHandler = new BasicResponseHandler();
+			resp = httpClient.execute(post, responseHandler);
 			if (callback != null) {
 				// TODO: Evaluate action of internal storage
 				// store(host+apiSection, resp.getStatusLine().getStatusCode(),

@@ -23,17 +23,17 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 
 	public static final String DB_NAME = "INTERNALDB";
 	public static final CursorFactory factory = null;
-	public static final int DB_VERSION = 1;
+	private static int DB_VERSION = 1;
 
-	private static Map<String, Table> tables = new HashMap<String, Table>();
+	protected static Map<String, Table> tables = new HashMap<String, Table>();
 
-	protected InternalDb(Context context) {
-		super(context, DB_NAME, null, DB_VERSION);
+	public InternalDb(Context context) {
+		super(context, DB_NAME, null, getDatabaseVersion());
 		tablesSpecification();
 	}
 
-	protected InternalDb(Context context, String db) {
-		super(context, db, null, DB_VERSION);
+	public InternalDb(Context context, String db) {
+		super(context, db, null, getDatabaseVersion());
 		tablesSpecification();
 	}
 
@@ -211,6 +211,14 @@ public abstract class InternalDb extends SQLiteOpenHelper {
 	// /////////////////////////////////////////////////
 
 	public abstract void tablesSpecification();
+
+	public static int getDatabaseVersion(){
+		return DB_VERSION;
+	}
+
+	public static void setDatabaseVersion(int version){
+		DB_VERSION = version;
+	}
 	
 	
 	public void exportDatabse(String databaseName, String packageName, String backupDBPath) {
