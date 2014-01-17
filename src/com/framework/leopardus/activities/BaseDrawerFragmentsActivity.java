@@ -60,7 +60,7 @@ public abstract class BaseDrawerFragmentsActivity extends
 	@SuppressWarnings("unused")
 	private int mActivePosition;
 	ActivityMethodInterface closeCallback = InterfacesHelper.getCloseMethod();
-	private static Stack<Fragment> fragments = new Stack<Fragment>();
+	private static Stack<Fragment> fragments;
 	private static final String STATE_ACTIVE_POSITION = "net.simonvt.menudrawer.samples.LeftDrawerSample.activePosition";
 	private static final String STATE_CURRENT_FRAGMENT = "net.simonvt.menudrawer.samples.FragmentSample";
 
@@ -71,6 +71,10 @@ public abstract class BaseDrawerFragmentsActivity extends
 	private int autoExitId = 8802;
 	private int res_drawer = R.drawable.ic_drawer;
 
+	public 	BaseDrawerFragmentsActivity() {
+		fragments = new Stack<Fragment>();
+	}
+	
 	protected void commitTransactions() {
 		if (mFragmentTransaction != null && !mFragmentTransaction.isEmpty()) {
 			mFragmentTransaction.commit();
